@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CWasm3",
+        "repositoryURL": "https://github.com/shareup/cwasm3.git",
+        "state": {
+          "branch": null,
+          "revision": "45f0235090ed9d40defeb33c5865256bcd028603",
+          "version": "0.4.7"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
