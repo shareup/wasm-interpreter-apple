@@ -1,6 +1,6 @@
 import Foundation
 
-enum WasmInterpreterError: Error {
+public enum WasmInterpreterError: Error {
     case couldNotLoadEnvironment
     case couldNotLoadRuntime
     case couldNotLoadWasmBinary(String)
@@ -9,5 +9,10 @@ enum WasmInterpreterError: Error {
     case couldNotFindFunction(String)
     case onCallFunction(String)
     case invalidFunctionReturnType
+    case invalidStackPointer
+    case invalidMemoryAccess
+    case invalidUTF8String
+    case couldNotGenerateFunctionContext
+    case incorrectArguments([WasmValue])
     case wasm3Error(String)
 }

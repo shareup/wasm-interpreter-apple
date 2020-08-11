@@ -5,8 +5,7 @@ public struct FibonacciModule {
     private let _vm: WasmInterpreter
 
     init() throws {
-        _vm = try WasmInterpreter(stackSize: 1 * 1024 * 1024)
-        try _vm.loadModule(FibonacciModule.wasm)
+        _vm = try WasmInterpreter(stackSize: 1 * 1024 * 1024, module: FibonacciModule.wasm)
     }
 
     func calculateValue(at index: Int) throws -> Int {

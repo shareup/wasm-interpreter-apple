@@ -5,8 +5,7 @@ public struct AddModule {
     private let _vm: WasmInterpreter
 
     init() throws {
-        _vm = try WasmInterpreter()
-        try _vm.loadModule(AddModule.wasm)
+        _vm = try WasmInterpreter(module: AddModule.wasm)
     }
 
     func add(_ first: Int, _ second: Int) throws -> Int {

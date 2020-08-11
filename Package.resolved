@@ -6,8 +6,17 @@
         "repositoryURL": "https://github.com/shareup/cwasm3.git",
         "state": {
           "branch": null,
-          "revision": "45f0235090ed9d40defeb33c5865256bcd028603",
+          "revision": "de5eefc2abb2497255c9fd545d967c3a6116a0b5",
           "version": "0.4.7"
+        }
+      },
+      {
+        "package": "Synchronized",
+        "repositoryURL": "https://github.com/shareup/synchronized.git",
+        "state": {
+          "branch": null,
+          "revision": "5f3312cf35cde0ddd1196ca9c44190b1859426e0",
+          "version": "2.0.0"
         }
       }
     ]

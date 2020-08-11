@@ -1,18 +1,31 @@
 import Foundation
 import CWasm3
+import Synchronized
 
 public final class WasmInterpreter {
     private var _environment: IM3Environment
     private var _runtime: IM3Runtime
+    private var _moduleAndBytes: (IM3Module, [UInt8])
+    private var _module: IM3Module { _moduleAndBytes.0 }
 
-    private var _moduleCache = [IM3Module: [UInt8]]()
     private var _functionCache = [String: IM3Function]()
+    private var _importedFunctionContexts = [UnsafeMutableRawPointer]()
 
-    public convenience init() throws {
-        try self.init(stackSize: 512 * 1024)
+    private let _lock = Lock()
+
+    public convenience init(module: URL) throws {
+        try self.init(stackSize: 512 * 1024, module: module)
     }
 
-    public init(stackSize: UInt32) throws {
+    public convenience init(stackSize: UInt32, module: URL) throws {
+        try self.init(stackSize: stackSize, module: Array<UInt8>(try Data(contentsOf: module)))
+    }
+
+    public convenience init(module bytes: [UInt8]) throws {
+        try self.init(stackSize: 512 * 1024, module: bytes)
+    }
+
+    public init(stackSize: UInt32, module bytes: [UInt8]) throws {
         guard let environment = m3_NewEnvironment() else {
             throw WasmInterpreterError.couldNotLoadEnvironment
         }
@@ -21,26 +34,82 @@ public final class WasmInterpreter {
             throw WasmInterpreterError.couldNotLoadRuntime
         }
 
+        var mod: IM3Module?
+        try WasmInterpreter.check(m3_ParseModule(environment, &mod, bytes, UInt32(bytes.count)))
+        guard let module = mod else { throw WasmInterpreterError.couldNotParseModule }
+        try WasmInterpreter.check(m3_LoadModule(runtime, module))
+
         _environment = environment
         _runtime = runtime
+        _moduleAndBytes = (module, bytes)
     }
 
     deinit {
         m3_FreeRuntime(_runtime)
         m3_FreeEnvironment(_environment)
-        _moduleCache.removeAll()
+        removeImportedFunctions(for: _importedFunctionContexts)
     }
 
-    public func loadModule(at url: URL) throws {
-        try loadModule(Array<UInt8>(try Data(contentsOf: url)))
-    }
+    /// Imports the specified native function into the module matching the supplied name. The
+    /// imported function must be included in the compiled module as an `import`.
+    ///
+    /// The function must be an `@convention(c)` function, which means, in essense, it
+    /// must be a static function, not a block.
+    ///
+    /// The function's signature must conform to `wasm3`'s format, which matches the following
+    /// form:
+    ///
+    /// ```c
+    /// u8  ConvertTypeCharToTypeId (char i_code)
+    /// {
+    ///     switch (i_code) {
+    ///     case 'v': return c_m3Type_void;
+    ///     case 'i': return c_m3Type_i32;
+    ///     case 'I': return c_m3Type_i64;
+    ///     case 'f': return c_m3Type_f32;
+    ///     case 'F': return c_m3Type_f64;
+    ///     case '*': return c_m3Type_ptr;
+    ///     }
+    ///     return c_m3Type_none;
+    /// }
+    /// ```
+    ///
+    /// For example, a function taking two arguments of types `Int64` and `Float32` and
+    /// no return value would have this signature: `v(I f)`
+    ///
+    /// - Throws: Throws if a module matching the given name can't be found or if the
+    /// underlying `wasm3` function returns an error.
+    ///
+    /// - Parameters:
+    ///   - name: The name of the function to import, matching the name specified inside the
+    ///   WebAssembly module.
+    ///   - namespace: The namespace of the function to import, matching the namespace
+    ///   specified inside the WebAssembly module.
+    ///   - signature: The signature of the function to import, conforming to `wasm3`'s guidelines
+    ///   as outlined above.
+    ///   - moduleName: The name of the module into which the function should be imported.
+    ///   - nativeFunction: The function to import into the specified WebAssembly module.
+    public func importNativeFunction(
+        named name: String,
+        namespace: String,
+        signature: String,
+        intoModuleNamed moduleName: String,
+        nativeFunction: @escaping ImportedFunctionSignature
+    ) throws {
+        guard let context = UnsafeMutableRawPointer(bitPattern: (namespace + name).hashValue) else {
+            throw WasmInterpreterError.couldNotGenerateFunctionContext
+        }
 
-    public func loadModule(_ bytes: [UInt8]) throws {
-        var mod: IM3Module?
-        try check(m3_ParseModule(_environment, &mod, bytes, UInt32(bytes.count)))
-        guard let module = mod else { throw WasmInterpreterError.couldNotParseModule }
-        try check(m3_LoadModule(_runtime, module))
-        _moduleCache[module] = bytes
+        do {
+            setImportedFunction(nativeFunction, for: context)
+            try WasmInterpreter.check(
+                m3_LinkRawFunctionEx(_module, namespace, name, signature, handleImportedFunction, context)
+            )
+            _lock.locked { _importedFunctionContexts.append(context) }
+        } catch {
+            removeImportedFunction(for: context)
+            throw error
+        }
     }
 
     public func call(_ name: String, args: [String]) throws {
@@ -70,18 +139,40 @@ public final class WasmInterpreter {
     public func call(_ name: String, args: [String]) throws -> Float {
         return try _call(try function(named: name), args: args)
     }
+
+    public func dataFromHeap(offset: Int, length: Int) throws -> Data {
+        let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
+        defer { totalBytes.deallocate() }
+
+        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0) else {
+            throw WasmInterpreterError.invalidMemoryAccess
+        }
+        guard offset + length < totalBytes.pointee else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        return Data(bytes: bytesPointer.advanced(by: offset), count: length)
+    }
+
+    public func stringFromHeap(offset: Int, length: Int) throws -> String {
+        let data = try dataFromHeap(offset: offset, length: length)
+        guard let string = String(data: data, encoding: .utf8) else {
+            throw WasmInterpreterError.invalidUTF8String
+        }
+        return string
+    }
 }
 
 extension WasmInterpreter {
     private func function(named name: String) throws -> IM3Function {
-        if let compiledFunction = _functionCache[name] {
-            return compiledFunction
-        } else {
-            var f: IM3Function?
-            try check(m3_FindFunction(&f, _runtime, name))
-            guard let function = f else { throw WasmInterpreterError.couldNotFindFunction(name) }
-            _functionCache[name] = function
-            return function
+        return try _lock.locked { () throws -> IM3Function in
+            if let compiledFunction = _functionCache[name] {
+                return compiledFunction
+            } else {
+                var f: IM3Function?
+                try WasmInterpreter.check(m3_FindFunction(&f, _runtime, name))
+                guard let function = f else { throw WasmInterpreterError.couldNotFindFunction(name) }
+                _functionCache[name] = function
+                return function
+            }
         }
     }
 
@@ -118,9 +209,39 @@ extension WasmInterpreter {
 }
 
 extension WasmInterpreter {
-    private func check(_ block: @autoclosure () throws -> M3Result?) throws {
+    private static func check(_ block: @autoclosure () throws -> M3Result?) throws {
         if let result = try block() {
             throw WasmInterpreterError.wasm3Error(String(cString: result))
         }
     }
+}
+
+private let importedFunctionLock = Lock()
+private var contextToImportedFunction = Dictionary<UnsafeMutableRawPointer, ImportedFunctionSignature>()
+
+private func setImportedFunction(_ function: @escaping ImportedFunctionSignature, for context: UnsafeMutableRawPointer) {
+    importedFunctionLock.locked { contextToImportedFunction[context] = function }
+}
+
+private func removeImportedFunction(for context: UnsafeMutableRawPointer) {
+    importedFunctionLock.locked { _ = contextToImportedFunction.removeValue(forKey: context) }
+}
+
+private func removeImportedFunctions(for contexts: [UnsafeMutableRawPointer]) {
+    importedFunctionLock.locked { contexts.forEach { contextToImportedFunction.removeValue(forKey: $0) } }
+}
+
+private func importedFunction(for context: UnsafeMutableRawPointer?) -> ImportedFunctionSignature? {
+    guard let context = context else { return nil }
+    return importedFunctionLock.locked { contextToImportedFunction[context] }
+}
+
+private func handleImportedFunction(
+    _ runtime: UnsafeMutablePointer<M3Runtime>?,
+    _ stackPointer: UnsafeMutablePointer<UInt64>?,
+    _ heap: UnsafeMutableRawPointer?,
+    _ context: UnsafeMutableRawPointer?
+) -> UnsafeRawPointer? {
+    guard let function = importedFunction(for: context) else { return UnsafeRawPointer(m3Err_trapUnreachable) }
+    return function(stackPointer, heap)
 }
