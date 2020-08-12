@@ -1,32 +1,42 @@
 import Foundation
 import CWasm3
 
-/// C function signature required for all native functions imported into a
-/// WebAssembly module.
-///
-/// - Parameters:
-///   - stackPointer: Stack pointer.
-///   - heap: Pointer to the heap.
-///
-/// - Returns: Error description as a C string if an error occurs, otherwise `nil`
-public typealias ImportedFunctionSignature =
-    (UnsafeMutablePointer<UInt64>?, UnsafeMutableRawPointer?) -> UnsafeRawPointer?
+public protocol WasmTypeProtocol {}
 
-public enum WasmType: Hashable {
+extension Int32: WasmTypeProtocol {}
+extension Int64: WasmTypeProtocol {}
+extension Float32: WasmTypeProtocol {}
+extension Float64: WasmTypeProtocol {}
+
+enum WasmType: Hashable {
     case int32
     case int64
     case float32
     case float64
 }
 
-public enum WasmValue: Hashable {
+enum WasmValue: Hashable {
     case int32(Int32)
     case int64(Int64)
     case float32(Float32)
     case float64(Float64)
 }
 
-public struct ImportedFunction {
+struct NativeFunction {
+    static func argument<Arg: WasmTypeProtocol>(
+        from stack: UnsafeMutablePointer<UInt64>?,
+        at index: Int
+    ) throws -> Arg {
+        guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
+        guard isValidWasmType(Arg.self) else {
+            throw WasmInterpreterError.unsupportedWasmType(String(describing: Arg.self))
+        }
+
+        return stack.load(
+            fromByteOffset: index * MemoryLayout<Int64>.stride,
+            as: Arg.self
+        )
+    }
 
     /// Extracts the imported function's arguments of the specified types from the stack.
     ///
@@ -76,14 +86,34 @@ public struct ImportedFunction {
         return values
     }
 
-    /// Places the specified return value on the specified stack.
+    /// Places the specified return value on the stack.
+    ///
+    /// - Throws: Throws if the stack pointer is `nil` or if `Ret` is not of type
+    /// `Int32`, `Int64`, `Float32`, or `Float64`.
+    ///
+    /// - Parameters:
+    ///   - ret: The value to return from the imported function.
+    ///   - stack: The stack pointer.
+    static func pushReturnValue<Ret: WasmTypeProtocol>(
+        _ ret: Ret,
+        to stack: UnsafeMutablePointer<UInt64>?
+    ) throws {
+        guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
+        guard isValidWasmType(Ret.self) else {
+            throw WasmInterpreterError.unsupportedWasmType(String(describing: Ret.self))
+        }
+
+        stack.storeBytes(of: ret, as: Ret.self)
+    }
+
+    /// Places the specified return value on the stack.
     ///
     /// - Throws: Throws if the stack pointer is `nil`.
     ///
     /// - Parameters:
     ///   - ret: The value to return from the imported function.
     ///   - stack: The stack pointer.
-    public static func pushReturnValue(_ ret: WasmValue, to stack: UnsafeMutablePointer<UInt64>?) throws {
+    static func pushReturnValue(_ ret: WasmValue, to stack: UnsafeMutablePointer<UInt64>?) throws {
         guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
 
         switch ret {
@@ -97,9 +127,13 @@ public struct ImportedFunction {
             stack.storeBytes(of: value, as: Float64.self)
         }
     }
+
+    static func isValidWasmType<T: WasmTypeProtocol>(_ type: T.Type) -> Bool {
+        return Int32.self == T.self || Int64.self == T.self || Float32.self == T.self || Float64.self == T.self
+    }
 }
 
-public let importedFunctionInternalError = UnsafeRawPointer(UnsafeMutableRawPointer.allocate(
+let importedFunctionInternalError = UnsafeRawPointer(UnsafeMutableRawPointer.allocate(
     byteCount: _importedFunctionInternalError.count, alignment: MemoryLayout<CChar>.alignment
 ))
 private let _importedFunctionInternalError = "ImportedFunctionInternalError".utf8CString

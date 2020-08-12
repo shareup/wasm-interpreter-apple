@@ -6,11 +6,10 @@ public struct ImportedAddModule {
 
     init() throws {
         _vm = try WasmInterpreter(module: ImportedAddModule.wasm)
-        try _vm.importNativeFunction(
+        try _vm.addImportHandler(
             named: "imported_add_func",
             namespace: "imports",
-            signature: "i(i I)",
-            nativeFunction: importedAdd
+            block: self.importedAdd
         )
     }
 
@@ -18,20 +17,8 @@ public struct ImportedAddModule {
         return Int(try _vm.call("integer_provider_func", args: []) as Int32)
     }
 
-    private var importedAdd: ImportedFunctionSignature {
-        return { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
-            do {
-                let args = try ImportedFunction.arguments(withTypes: [.int32, .int64], from: stack)
-                guard case .int32(let first) = args[0], case .int64(let second) = args[1] else {
-                    throw WasmInterpreterError.incorrectArguments(args)
-                }
-                let sum = Int32(Int64(first) + second)
-                try ImportedFunction.pushReturnValue(.int32(sum), to: stack)
-                return nil
-            } catch {
-                return importedFunctionInternalError
-            }
-        }
+    private var importedAdd: (Int32, Int64) -> Int32 {
+        return { return Int32(Int64($0) + $1) }
     }
 
     // `wat2wasm -o >(base64) Tests/WasmInterpreterTests/Resources/imported-add.wat | pbcopy`

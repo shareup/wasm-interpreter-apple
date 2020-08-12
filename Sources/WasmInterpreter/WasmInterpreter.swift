@@ -50,66 +50,6 @@ public final class WasmInterpreter {
         removeImportedFunctions(for: _importedFunctionContexts)
     }
 
-    /// Imports the specified native function into the module matching the supplied name. The
-    /// imported function must be included in the compiled module as an `import`.
-    ///
-    /// The function must be an `@convention(c)` function, which means, in essense, it
-    /// must be a static function, not a block.
-    ///
-    /// The function's signature must conform to `wasm3`'s format, which matches the following
-    /// form:
-    ///
-    /// ```c
-    /// u8  ConvertTypeCharToTypeId (char i_code)
-    /// {
-    ///     switch (i_code) {
-    ///     case 'v': return c_m3Type_void;
-    ///     case 'i': return c_m3Type_i32;
-    ///     case 'I': return c_m3Type_i64;
-    ///     case 'f': return c_m3Type_f32;
-    ///     case 'F': return c_m3Type_f64;
-    ///     case '*': return c_m3Type_ptr;
-    ///     }
-    ///     return c_m3Type_none;
-    /// }
-    /// ```
-    ///
-    /// For example, a function taking two arguments of types `Int64` and `Float32` and
-    /// no return value would have this signature: `v(I f)`
-    ///
-    /// - Throws: Throws if a module matching the given name can't be found or if the
-    /// underlying `wasm3` function returns an error.
-    ///
-    /// - Parameters:
-    ///   - name: The name of the function to import, matching the name specified inside the
-    ///   WebAssembly module.
-    ///   - namespace: The namespace of the function to import, matching the namespace
-    ///   specified inside the WebAssembly module.
-    ///   - signature: The signature of the function to import, conforming to `wasm3`'s guidelines
-    ///   as outlined above.
-    ///   - nativeFunction: The function to import into the specified WebAssembly module.
-    public func importNativeFunction(
-        named name: String,
-        namespace: String,
-        signature: String,
-        nativeFunction: @escaping ImportedFunctionSignature
-    ) throws {
-        guard let context = UnsafeMutableRawPointer(bitPattern: (namespace + name).hashValue) else {
-            throw WasmInterpreterError.couldNotGenerateFunctionContext
-        }
-
-        do {
-            setImportedFunction(nativeFunction, for: context)
-            try WasmInterpreter.check(
-                m3_LinkRawFunctionEx(_module, namespace, name, signature, handleImportedFunction, context)
-            )
-            _lock.locked { _importedFunctionContexts.append(context) }
-        } catch {
-            removeImportedFunction(for: context)
-            throw error
-        }
-    }
-
     public func call(_ name: String, args: [String]) throws {
         try _call(try function(named: name), args: args)
     }
@@ -156,6 +96,67 @@ public final class WasmInterpreter {
             throw WasmInterpreterError.invalidUTF8String
         }
         return string
+    }
+}
+
+typealias ImportedFunctionSignature = (UnsafeMutablePointer<UInt64>?, UnsafeMutableRawPointer?) -> UnsafeRawPointer?
+
+extension WasmInterpreter {
+    /// Imports the specified block into the module matching the supplied name. The
+    /// imported block must be included in the compiled module as an `import`.
+    ///
+    /// The function's signature must conform to `wasm3`'s format, which matches the following
+    /// form:
+    ///
+    /// ```c
+    /// u8  ConvertTypeCharToTypeId (char i_code)
+    /// {
+    ///     switch (i_code) {
+    ///     case 'v': return c_m3Type_void;
+    ///     case 'i': return c_m3Type_i32;
+    ///     case 'I': return c_m3Type_i64;
+    ///     case 'f': return c_m3Type_f32;
+    ///     case 'F': return c_m3Type_f64;
+    ///     case '*': return c_m3Type_ptr;
+    ///     }
+    ///     return c_m3Type_none;
+    /// }
+    /// ```
+    ///
+    /// For example, a block taking two arguments of types `Int64` and `Float32` and
+    /// no return value would have this signature: `v(I f)`
+    ///
+    /// - Throws: Throws if a module matching the given name can't be found or if the
+    /// underlying `wasm3` function returns an error.
+    ///
+    /// - Parameters:
+    ///   - name: The name of the function to import, matching the name specified inside the
+    ///   WebAssembly module.
+    ///   - namespace: The namespace of the function to import, matching the namespace
+    ///   specified inside the WebAssembly module.
+    ///   - signature: The signature of the function to import, conforming to `wasm3`'s guidelines
+    ///   as outlined above.
+    ///   - handler: The function to import into the specified WebAssembly module.
+    func importNativeFunction(
+        named name: String,
+        namespace: String,
+        signature: String,
+        handler: @escaping ImportedFunctionSignature
+    ) throws {
+        guard let context = UnsafeMutableRawPointer(bitPattern: (namespace + name).hashValue) else {
+            throw WasmInterpreterError.couldNotGenerateFunctionContext
+        }
+
+        do {
+            setImportedFunction(handler, for: context)
+            try WasmInterpreter.check(
+                m3_LinkRawFunctionEx(_module, namespace, name, signature, handleImportedFunction, context)
+            )
+            _lock.locked { _importedFunctionContexts.append(context) }
+        } catch {
+            removeImportedFunction(for: context)
+            throw error
+        }
     }
 }
 

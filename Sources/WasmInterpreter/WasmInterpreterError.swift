@@ -13,7 +13,8 @@ public enum WasmInterpreterError: Error {
     case invalidMemoryAccess
     case invalidUTF8String
     case couldNotGenerateFunctionContext
-    case incorrectArguments([WasmValue])
+    case incorrectArguments
     case missingHeap
+    case unsupportedWasmType(String)
     case wasm3Error(String)
 }
