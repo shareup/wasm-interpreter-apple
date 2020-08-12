@@ -10,7 +10,6 @@ public struct ImportedAddModule {
             named: "imported_add_func",
             namespace: "imports",
             signature: "i(i I)",
-            intoModuleNamed: "imports",
             nativeFunction: importedAdd
         )
     }
@@ -23,7 +22,6 @@ public struct ImportedAddModule {
         return { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
                 let args = try ImportedFunction.arguments(withTypes: [.int32, .int64], from: stack)
-                guard args.count == 2 else { throw WasmInterpreterError.incorrectArguments(args) }
                 guard case .int32(let first) = args[0], case .int64(let second) = args[1] else {
                     throw WasmInterpreterError.incorrectArguments(args)
                 }

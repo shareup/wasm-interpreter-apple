@@ -14,5 +14,6 @@ public enum WasmInterpreterError: Error {
     case invalidUTF8String
     case couldNotGenerateFunctionContext
     case incorrectArguments([WasmValue])
+    case missingHeap
     case wasm3Error(String)
 }

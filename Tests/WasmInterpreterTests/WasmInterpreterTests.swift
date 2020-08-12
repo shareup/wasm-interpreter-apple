@@ -24,9 +24,16 @@ final class WasmInterpreterTests: XCTestCase {
         XCTAssertEqual(-3291, try mod.askModuleToCallImportedFunction())
     }
 
+    func testAccessingAndModifyingHeapMemory() throws {
+        let mod = try MemoryModule()
+        try XCTAssertEqual("AAAAAAAAAAAAA", mod.callWrite())
+        try XCTAssertEqual("AAAAAABAAAAAA", mod.callModify())
+    }
+
     static var allTests = [
         ("testPassingAndReturning32BitValues", testPassingAndReturning32BitValues),
         ("testPassingAndReturning64BitValues", testPassingAndReturning64BitValues),
         ("testUsingImportedFunction", testUsingImportedFunction),
+        ("testAccessingAndModifyingHeapMemory", testAccessingAndModifyingHeapMemory),
     ]
 }

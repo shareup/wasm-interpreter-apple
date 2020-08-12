@@ -87,13 +87,11 @@ public final class WasmInterpreter {
     ///   specified inside the WebAssembly module.
     ///   - signature: The signature of the function to import, conforming to `wasm3`'s guidelines
     ///   as outlined above.
-    ///   - moduleName: The name of the module into which the function should be imported.
     ///   - nativeFunction: The function to import into the specified WebAssembly module.
     public func importNativeFunction(
         named name: String,
         namespace: String,
         signature: String,
-        intoModuleNamed moduleName: String,
         nativeFunction: @escaping ImportedFunctionSignature
     ) throws {
         guard let context = UnsafeMutableRawPointer(bitPattern: (namespace + name).hashValue) else {
