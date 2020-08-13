@@ -9,7 +9,7 @@ public struct FibonacciModule {
     }
 
     func calculateValue(at index: Int) throws -> Int {
-        return Int(try _vm.call("fib", args: [String(index)]) as Int64)
+        return Int(try _vm.call("fib", Int64(index)) as Int64)
     }
 
     // `wat2wasm -o >(base64) Tests/WasmInterpreterTests/Resources/fib64.wat | pbcopy`

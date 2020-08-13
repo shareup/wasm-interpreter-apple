@@ -1,27 +1,6 @@
 import Foundation
 import CWasm3
 
-public protocol WasmTypeProtocol {}
-
-extension Int32: WasmTypeProtocol {}
-extension Int64: WasmTypeProtocol {}
-extension Float32: WasmTypeProtocol {}
-extension Float64: WasmTypeProtocol {}
-
-enum WasmType: Hashable {
-    case int32
-    case int64
-    case float32
-    case float64
-}
-
-enum WasmValue: Hashable {
-    case int32(Int32)
-    case int64(Int64)
-    case float32(Float32)
-    case float64(Float64)
-}
-
 struct NativeFunction {
     static func argument<Arg: WasmTypeProtocol>(
         from stack: UnsafeMutablePointer<UInt64>?,
@@ -126,10 +105,6 @@ struct NativeFunction {
         case .float64(let value):
             stack.storeBytes(of: value, as: Float64.self)
         }
-    }
-
-    static func isValidWasmType<T: WasmTypeProtocol>(_ type: T.Type) -> Bool {
-        return Int32.self == T.self || Int64.self == T.self || Float32.self == T.self || Float64.self == T.self
     }
 }
 

@@ -50,34 +50,6 @@ public final class WasmInterpreter {
         removeImportedFunctions(for: _importedFunctionContexts)
     }
 
-    public func call(_ name: String, args: [String]) throws {
-        try _call(try function(named: name), args: args)
-    }
-
-    public func call(_ name: String, args: [String]) throws -> Int64 {
-        return try _call(try function(named: name), args: args)
-    }
-
-    public func call(_ name: String, args: [String]) throws -> UInt64 {
-        return try _call(try function(named: name), args: args)
-    }
-
-    public func call(_ name: String, args: [String]) throws -> Int32 {
-        return try _call(try function(named: name), args: args)
-    }
-
-    public func call(_ name: String, args: [String]) throws -> UInt32 {
-        return try _call(try function(named: name), args: args)
-    }
-
-    public func call(_ name: String, args: [String]) throws -> Double {
-        return try _call(try function(named: name), args: args)
-    }
-
-    public func call(_ name: String, args: [String]) throws -> Float {
-        return try _call(try function(named: name), args: args)
-    }
-
     public func dataFromHeap(offset: Int, length: Int) throws -> Data {
         let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         defer { totalBytes.deallocate() }
@@ -161,7 +133,7 @@ extension WasmInterpreter {
 }
 
 extension WasmInterpreter {
-    private func function(named name: String) throws -> IM3Function {
+    func function(named name: String) throws -> IM3Function {
         return try _lock.locked { () throws -> IM3Function in
             if let compiledFunction = _functionCache[name] {
                 return compiledFunction
@@ -175,7 +147,7 @@ extension WasmInterpreter {
         }
     }
 
-    private func _call(_ function: IM3Function, args: [String]) throws {
+    func _call(_ function: IM3Function, args: [String]) throws {
         try args.withCStrings { (cStrings) throws -> Void in
             var mutableCStrings = cStrings
             let size = UnsafeMutablePointer<Int>.allocate(capacity: 1)
@@ -190,7 +162,7 @@ extension WasmInterpreter {
         }
     }
 
-    private func _call<T>(_ function: IM3Function, args: [String]) throws -> T {
+    func _call<T>(_ function: IM3Function, args: [String]) throws -> T {
         try args.withCStrings { (cStrings) throws -> T in
             var mutableCStrings = cStrings
             let size = UnsafeMutablePointer<Int>.allocate(capacity: 1)

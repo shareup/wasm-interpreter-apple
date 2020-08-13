@@ -14,7 +14,7 @@ public struct ImportedAddModule {
     }
 
     func askModuleToCallImportedFunction() throws -> Int {
-        return Int(try _vm.call("integer_provider_func", args: []) as Int32)
+        return Int(try _vm.call("integer_provider_func") as Int32)
     }
 
     private var importedAdd: (Int32, Int64) -> Int32 {

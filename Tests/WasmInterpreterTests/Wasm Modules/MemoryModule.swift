@@ -10,12 +10,12 @@ public struct MemoryModule {
     }
 
     func callWrite() throws -> String {
-        try _vm.call("write_utf8", args: []) as ()
+        try _vm.call("write_utf8") as ()
         return try _vm.stringFromHeap(offset: 0, length: 13) // offset and length hardcoded in memory.wasm
     }
 
     func callModify() throws -> String {
-        try _vm.call("modify_utf8", args: ["6"]) as ()
+        try _vm.call("modify_utf8", Int32(6))
         return try _vm.stringFromHeap(offset: 0, length: 13) // offset and length hardcoded in memory.wasm
     }
 

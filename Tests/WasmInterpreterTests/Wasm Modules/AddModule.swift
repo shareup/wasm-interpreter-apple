@@ -9,7 +9,7 @@ public struct AddModule {
     }
 
     func add(_ first: Int, _ second: Int) throws -> Int {
-        return Int(try _vm.call("add", args: [String(first), String(second)]) as Int32)
+        return Int(try _vm.call("add", Int32(first), Int32(second)) as Int32)
     }
 
     // `wat2wasm -o >(base64) Tests/WasmInterpreterTests/Resources/add.wat | pbcopy`
