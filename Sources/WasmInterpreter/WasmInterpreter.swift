@@ -50,16 +50,22 @@ public final class WasmInterpreter {
         removeImportedFunctions(for: _importedFunctionContexts)
     }
 
-    public func dataFromHeap(offset: Int, length: Int) throws -> Data {
+    public func heap() throws -> Heap {
         let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         defer { totalBytes.deallocate() }
 
         guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0) else {
             throw WasmInterpreterError.invalidMemoryAccess
         }
-        guard offset + length < totalBytes.pointee else { throw WasmInterpreterError.invalidMemoryAccess }
 
-        return Data(bytes: bytesPointer.advanced(by: offset), count: length)
+        return Heap(pointer: bytesPointer, size: Int(totalBytes.pointee))
+    }
+
+    public func dataFromHeap(offset: Int, length: Int) throws -> Data {
+        let heap = try self.heap()
+        guard offset + length < heap.size else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        return Data(bytes: heap.pointer.advanced(by: offset), count: length)
     }
 
     public func stringFromHeap(offset: Int, length: Int) throws -> String {
