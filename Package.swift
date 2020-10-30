@@ -14,7 +14,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "CWasm3", url: "https://github.com/shareup/cwasm3.git", .upToNextMinor(from: "0.4.7")),
-        .package(name: "Synchronized", url: "https://github.com/shareup/synchronized.git", .upToNextMajor(from: "2.0.0")),
+        .package(name: "Synchronized", url: "https://github.com/shareup/synchronized.git", .upToNextMajor(from: "2.1.0")),
     ],
     targets: [
         .target(
