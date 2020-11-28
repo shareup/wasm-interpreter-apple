@@ -2,6 +2,12 @@ import XCTest
 @testable import WasmInterpreter
 
 final class WasmInterpreterTests: XCTestCase {
+    func testCallingTwoFunctionsWithSameImplementation() throws {
+        let mod = try ConstantModule()
+        XCTAssertEqual(65536, try mod.constant1())
+        XCTAssertEqual(65536, try mod.constant2())
+    }
+
     func testPassingAndReturning32BitValues() throws {
         let mod = try AddModule()
         XCTAssertEqual(0, try mod.add(-1, 1))
@@ -31,6 +37,7 @@ final class WasmInterpreterTests: XCTestCase {
     }
 
     static var allTests = [
+        ("testCallingTwoFunctionsWithSameImplementation", testCallingTwoFunctionsWithSameImplementation),
         ("testPassingAndReturning32BitValues", testPassingAndReturning32BitValues),
         ("testPassingAndReturning64BitValues", testPassingAndReturning64BitValues),
         ("testUsingImportedFunction", testUsingImportedFunction),
