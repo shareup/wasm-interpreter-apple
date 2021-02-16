@@ -91,14 +91,11 @@ public final class WasmInterpreter {
         guard heap.isValid(offset: offset, length: length)
         else { throw WasmInterpreterError.invalidMemoryAccess }
 
-        return heap.pointer
+        let ptr = UnsafeRawPointer(heap.pointer)
             .advanced(by: offset)
-            .withMemoryRebound(
-                to: T.self,
-                capacity: length
-            ) { (pointer: UnsafeMutablePointer<T>) -> [T] in
-                return (0..<length).map { pointer.advanced(by: $0).pointee }
-            }
+            .bindMemory(to: T.self, capacity: length)
+
+        return (0..<length).map { ptr[$0] }
     }
 
     public func writeToHeap(data: Data, offset: Int) throws {
