@@ -8,6 +8,10 @@ public struct MemoryModule {
         _vm = try WasmInterpreter(module: MemoryModule.wasm)
     }
 
+    func heapSize() throws -> Int {
+        try _vm.heap().size
+    }
+
     func string(at offset: Int, length: Int) throws -> String {
         try _vm.stringFromHeap(offset: offset, length: length)
     }
