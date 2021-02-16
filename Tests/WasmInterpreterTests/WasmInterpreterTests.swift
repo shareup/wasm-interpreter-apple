@@ -32,8 +32,24 @@ final class WasmInterpreterTests: XCTestCase {
 
     func testAccessingAndModifyingHeapMemory() throws {
         let mod = try MemoryModule()
-        try XCTAssertEqual("AAAAAAAAAAAAA", mod.callWrite())
-        try XCTAssertEqual("AAAAAABAAAAAA", mod.callModify())
+
+        XCTAssertEqual("\u{0}\u{0}\u{0}\u{0}", try mod.string(at: 0, length: 4))
+
+        let hello = "Hello, everyone! 👋"
+        try mod.write(hello, to: 0)
+        XCTAssertEqual(hello, try mod.string(at: 0, length: hello.utf8.count))
+
+        let numbers = [1, 2, 3, 4]
+        try mod.write(numbers, to: 0)
+        XCTAssertEqual(numbers, try mod.integers(at: 0, length: 4))
+
+        let fortyTwo = [42]
+        try mod.write(fortyTwo, to: 1)
+        XCTAssertEqual(42, try mod.integers(at: 1, length: 1).first)
+
+        XCTAssertEqual(10753, try mod.integers(at: 0, length: 1).first)
+
+        XCTAssertEqual("👋", try mod.string(at: 17, length: "👋".utf8.count))
     }
 
     static var allTests = [

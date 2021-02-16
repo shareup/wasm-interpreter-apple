@@ -75,6 +75,56 @@ public final class WasmInterpreter {
         }
         return string
     }
+
+    public func valueFromHeap<T: WasmTypeProtocol>(offset: Int) throws -> T {
+        let values = try valuesFromHeap(offset: offset, length: 1) as [T]
+        guard let value = values.first
+        else { throw WasmInterpreterError.couldNotLoadMemory }
+        return value
+    }
+
+    public func valuesFromHeap<T: WasmTypeProtocol>(offset: Int, length: Int) throws -> [T] {
+        let heap = try self.heap()
+        guard offset + length < heap.size else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        return heap.pointer
+            .advanced(by: offset)
+            .withMemoryRebound(
+                to: T.self,
+                capacity: length
+            ) { (pointer: UnsafeMutablePointer<T>) -> [T] in
+                return (0..<length).map { pointer.advanced(by: $0).pointee }
+            }
+    }
+
+    public func writeToHeap(data: Data, offset: Int) throws {
+        let heap = try self.heap()
+        guard offset + data.count < heap.size else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        try data.withUnsafeBytes { (rawPointer: UnsafeRawBufferPointer) -> Void in
+            guard let pointer = rawPointer.bindMemory(to: UInt8.self).baseAddress
+            else { throw WasmInterpreterError.couldNotBindMemory }
+            heap.pointer
+                .advanced(by: offset)
+                .initialize(from: pointer, count: data.count)
+        }
+    }
+
+    public func writeToHeap(string: String, offset: Int) throws {
+        try writeToHeap(data: Data(string.utf8), offset: offset)
+    }
+
+    public func writeToHeap<T: WasmTypeProtocol>(value: T, offset: Int) throws {
+        try writeToHeap(values: [value], offset: offset)
+    }
+
+    public func writeToHeap<T: WasmTypeProtocol>(values: Array<T>, offset: Int) throws {
+        var values = values
+        try writeToHeap(
+            data: Data(bytes: &values, count: values.count * MemoryLayout<T>.size),
+            offset: offset
+        )
+    }
 }
 
 typealias ImportedFunctionSignature = (UnsafeMutablePointer<UInt64>?, UnsafeMutableRawPointer?) -> UnsafeRawPointer?
@@ -168,7 +218,7 @@ extension WasmInterpreter {
         }
     }
 
-    func _call<T>(_ function: IM3Function, args: [String]) throws -> T {
+    func _call<T: WasmTypeProtocol>(_ function: IM3Function, args: [String]) throws -> T {
         try args.withCStrings { (cStrings) throws -> T in
             var mutableCStrings = cStrings
             let size = UnsafeMutablePointer<Int>.allocate(capacity: 1)
