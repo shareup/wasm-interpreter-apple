@@ -55,9 +55,8 @@ public final class WasmInterpreter {
         let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         defer { totalBytes.deallocate() }
 
-        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0) else {
-            throw WasmInterpreterError.invalidMemoryAccess
-        }
+        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
 
         return Heap(pointer: bytesPointer, size: Int(totalBytes.pointee))
     }
@@ -73,9 +72,10 @@ public final class WasmInterpreter {
 
     public func stringFromHeap(offset: Int, length: Int) throws -> String {
         let data = try dataFromHeap(offset: offset, length: length)
-        guard let string = String(data: data, encoding: .utf8) else {
-            throw WasmInterpreterError.invalidUTF8String
-        }
+
+        guard let string = String(data: data, encoding: .utf8)
+        else { throw WasmInterpreterError.invalidUTF8String }
+
         return string
     }
 
