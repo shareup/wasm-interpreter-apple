@@ -6,31 +6,28 @@ public struct MemoryModule {
 
     init() throws {
         _vm = try WasmInterpreter(module: MemoryModule.wasm)
-        try _vm.addImportHandler(named: "write", namespace: "native", block: self.write)
     }
 
-    func callWrite() throws -> String {
-        try _vm.call("write_utf8") as ()
-        return try _vm.stringFromHeap(offset: 0, length: 13) // offset and length hardcoded in memory.wasm
+    func string(at offset: Int, length: Int) throws -> String {
+        try _vm.stringFromHeap(offset: offset, length: length)
     }
 
-    func callModify() throws -> String {
-        try _vm.call("modify_utf8", Int32(6))
-        return try _vm.stringFromHeap(offset: 0, length: 13) // offset and length hardcoded in memory.wasm
+    func integers(at offset: Int, length: Int) throws -> [Int] {
+        (try _vm.valuesFromHeap(offset: offset, length: length) as [Int32])
+            .map(Int.init)
     }
 
-    private var write: (Int32, Int32, UnsafeMutableRawPointer?) -> Void {
-        return { (offset: Int32, length: Int32, heap: UnsafeMutableRawPointer?) -> Void in
-            heap?
-                .advanced(by: Int(offset))
-                .initializeMemory(as: CChar.self, repeating: CChar(bitPattern: 0x0041), count: Int(length))
-        }
+    func write(_ string: String, to offset: Int) throws {
+        try _vm.writeToHeap(string: string, offset: offset)
+    }
+
+    func write(_ integers: [Int], to offset: Int) throws {
+        try _vm.writeToHeap(values: integers.map(Int32.init), offset: offset)
     }
 
     // `wat2wasm -o >(base64) Tests/WasmInterpreterTests/Resources/memory.wat | pbcopy`
     private static var wasm: [UInt8] {
-        let base64 =
-            "AGFzbQEAAAABDQNgAn9/AGAAAGABfwACEAEGbmF0aXZlBXdyaXRlAAADAwIBAgUDAQABBxwCCndyaXRlX3V0ZjgAAQttb2RpZnlfdXRmOAACChoCCABBAEENEAALDwAgACAAKAIAQQFqNgIACw=="
+        let base64 = "AGFzbQEAAAAFAwEAAQ=="
         return Array<UInt8>(Data(base64Encoded: base64)!)
     }
 }

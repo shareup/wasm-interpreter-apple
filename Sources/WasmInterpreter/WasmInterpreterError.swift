@@ -15,6 +15,8 @@ public enum WasmInterpreterError: Error {
     case couldNotGenerateFunctionContext
     case incorrectArguments
     case missingHeap
+    case couldNotLoadMemory
+    case couldNotBindMemory
     case unsupportedWasmType(String)
     case wasm3Error(String)
 }
