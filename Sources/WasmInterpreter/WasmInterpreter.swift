@@ -50,13 +50,13 @@ public final class WasmInterpreter {
         removeImportedFunctions(for: _importedFunctionContexts)
     }
 
+    @available(*, deprecated, message: "Heap will be removed in a later version")
     public func heap() throws -> Heap {
         let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         defer { totalBytes.deallocate() }
 
-        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0) else {
-            throw WasmInterpreterError.invalidMemoryAccess
-        }
+        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
 
         return Heap(pointer: bytesPointer, size: Int(totalBytes.pointee))
     }
@@ -72,9 +72,10 @@ public final class WasmInterpreter {
 
     public func stringFromHeap(offset: Int, length: Int) throws -> String {
         let data = try dataFromHeap(offset: offset, length: length)
-        guard let string = String(data: data, encoding: .utf8) else {
-            throw WasmInterpreterError.invalidUTF8String
-        }
+
+        guard let string = String(data: data, encoding: .utf8)
+        else { throw WasmInterpreterError.invalidUTF8String }
+
         return string
     }
 
@@ -91,14 +92,11 @@ public final class WasmInterpreter {
         guard heap.isValid(offset: offset, length: length)
         else { throw WasmInterpreterError.invalidMemoryAccess }
 
-        return heap.pointer
+        let ptr = UnsafeRawPointer(heap.pointer)
             .advanced(by: offset)
-            .withMemoryRebound(
-                to: T.self,
-                capacity: length
-            ) { (pointer: UnsafeMutablePointer<T>) -> [T] in
-                return (0..<length).map { pointer.advanced(by: $0).pointee }
-            }
+            .bindMemory(to: T.self, capacity: length)
+
+        return (0..<length).map { ptr[$0] }
     }
 
     public func writeToHeap(data: Data, offset: Int) throws {
