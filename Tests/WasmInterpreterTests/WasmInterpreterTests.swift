@@ -52,11 +52,41 @@ final class WasmInterpreterTests: XCTestCase {
         XCTAssertEqual("👋", try mod.string(at: 17, length: "👋".utf8.count))
     }
 
+    func testAccessingInvalidMemoryAddresses() throws {
+        let mod = try MemoryModule()
+        let size = try mod.heapSize()
+
+        let message = "Hello"
+
+        let validOffset = size - message.utf8.count
+        XCTAssertNoThrow(try mod.write(message, to: validOffset))
+        XCTAssertEqual(
+            message,
+            try mod.string(at: validOffset, length: message.utf8.count)
+        )
+
+        let invalidOffset = size - message.utf8.count + 1
+        XCTAssertThrowsError(try mod.write(message, to: invalidOffset)) { error in
+            guard let wasmError = error as? WasmInterpreterError
+            else { return XCTFail() }
+
+            guard case .invalidMemoryAccess = wasmError
+            else { return XCTFail() }
+        }
+
+        // Ensure memory hasn't been modified
+        XCTAssertEqual(
+            message,
+            try mod.string(at: validOffset, length: message.utf8.count)
+        )
+    }
+
     static var allTests = [
         ("testCallingTwoFunctionsWithSameImplementation", testCallingTwoFunctionsWithSameImplementation),
         ("testPassingAndReturning32BitValues", testPassingAndReturning32BitValues),
         ("testPassingAndReturning64BitValues", testPassingAndReturning64BitValues),
         ("testUsingImportedFunction", testUsingImportedFunction),
         ("testAccessingAndModifyingHeapMemory", testAccessingAndModifyingHeapMemory),
+        ("testAccessingInvalidMemoryAddresses", testAccessingInvalidMemoryAddresses),
     ]
 }

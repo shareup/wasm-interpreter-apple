@@ -63,7 +63,9 @@ public final class WasmInterpreter {
 
     public func dataFromHeap(offset: Int, length: Int) throws -> Data {
         let heap = try self.heap()
-        guard offset + length < heap.size else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        guard heap.isValid(offset: offset, length: length)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
 
         return Data(bytes: heap.pointer.advanced(by: offset), count: length)
     }
@@ -85,7 +87,9 @@ public final class WasmInterpreter {
 
     public func valuesFromHeap<T: WasmTypeProtocol>(offset: Int, length: Int) throws -> [T] {
         let heap = try self.heap()
-        guard offset + length < heap.size else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        guard heap.isValid(offset: offset, length: length)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
 
         return heap.pointer
             .advanced(by: offset)
@@ -99,7 +103,9 @@ public final class WasmInterpreter {
 
     public func writeToHeap(data: Data, offset: Int) throws {
         let heap = try self.heap()
-        guard offset + data.count < heap.size else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        guard heap.isValid(offset: offset, length: data.count)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
 
         try data.withUnsafeBytes { (rawPointer: UnsafeRawBufferPointer) -> Void in
             guard let pointer = rawPointer.bindMemory(to: UInt8.self).baseAddress
