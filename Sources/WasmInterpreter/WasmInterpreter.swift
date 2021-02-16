@@ -50,6 +50,7 @@ public final class WasmInterpreter {
         removeImportedFunctions(for: _importedFunctionContexts)
     }
 
+    @available(*, deprecated, message: "Heap will be removed in a later version")
     public func heap() throws -> Heap {
         let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         defer { totalBytes.deallocate() }
