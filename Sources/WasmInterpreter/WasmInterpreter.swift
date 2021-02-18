@@ -49,29 +49,11 @@ public final class WasmInterpreter {
         m3_FreeEnvironment(_environment)
         removeImportedFunctions(for: _importedFunctionContexts)
     }
+}
 
-    @available(*, deprecated, message: "Heap will be removed in a later version")
-    public func heap() throws -> Heap {
-        let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
-        defer { totalBytes.deallocate() }
-
-        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0)
-        else { throw WasmInterpreterError.invalidMemoryAccess }
-
-        return Heap(pointer: bytesPointer, size: Int(totalBytes.pointee))
-    }
-
-    public func dataFromHeap(offset: Int, length: Int) throws -> Data {
-        let heap = try self.heap()
-
-        guard heap.isValid(offset: offset, length: length)
-        else { throw WasmInterpreterError.invalidMemoryAccess }
-
-        return Data(bytes: heap.pointer.advanced(by: offset), count: length)
-    }
-
-    public func stringFromHeap(offset: Int, length: Int) throws -> String {
-        let data = try dataFromHeap(offset: offset, length: length)
+extension WasmInterpreter {
+    public func stringFromHeap(byteOffset: Int, length: Int) throws -> String {
+        let data = try dataFromHeap(byteOffset: byteOffset, length: length)
 
         guard let string = String(data: data, encoding: .utf8)
         else { throw WasmInterpreterError.invalidUTF8String }
@@ -79,55 +61,99 @@ public final class WasmInterpreter {
         return string
     }
 
-    public func valueFromHeap<T: WasmTypeProtocol>(offset: Int) throws -> T {
-        let values = try valuesFromHeap(offset: offset, length: 1) as [T]
+    public func valueFromHeap<T: WasmTypeProtocol>(byteOffset: Int) throws -> T {
+        let values = try valuesFromHeap(byteOffset: byteOffset, length: 1) as [T]
         guard let value = values.first
         else { throw WasmInterpreterError.couldNotLoadMemory }
         return value
     }
 
-    public func valuesFromHeap<T: WasmTypeProtocol>(offset: Int, length: Int) throws -> [T] {
+    public func valuesFromHeap<T: WasmTypeProtocol>(byteOffset: Int, length: Int) throws -> [T] {
         let heap = try self.heap()
 
-        guard heap.isValid(offset: offset, length: length)
+        guard heap.isValid(byteOffset: byteOffset, length: length)
         else { throw WasmInterpreterError.invalidMemoryAccess }
 
         let ptr = UnsafeRawPointer(heap.pointer)
-            .advanced(by: offset)
+            .advanced(by: byteOffset)
             .bindMemory(to: T.self, capacity: length)
 
         return (0..<length).map { ptr[$0] }
     }
 
-    public func writeToHeap(data: Data, offset: Int) throws {
+    public func dataFromHeap(byteOffset: Int, length: Int) throws -> Data {
         let heap = try self.heap()
 
-        guard heap.isValid(offset: offset, length: data.count)
+        guard heap.isValid(byteOffset: byteOffset, length: length)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
+        
+        return Data(bytes: heap.pointer.advanced(by: byteOffset), count: length)
+    }
+
+    public func bytesFromHeap(byteOffset: Int, length: Int) throws -> [UInt8] {
+        let heap = try self.heap()
+
+        guard heap.isValid(byteOffset: byteOffset, length: length)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        let bufferPointer = UnsafeBufferPointer(
+            start: heap.pointer.advanced(by: byteOffset),
+            count: length
+        )
+
+        return Array(bufferPointer)
+    }
+
+    public func writeToHeap(string: String, byteOffset: Int) throws {
+        try writeToHeap(data: Data(string.utf8), byteOffset: byteOffset)
+    }
+
+    public func writeToHeap<T: WasmTypeProtocol>(value: T, byteOffset: Int) throws {
+        try writeToHeap(values: [value], byteOffset: byteOffset)
+    }
+
+    public func writeToHeap<T: WasmTypeProtocol>(values: Array<T>, byteOffset: Int) throws {
+        var values = values
+        try writeToHeap(
+            data: Data(bytes: &values, count: values.count * MemoryLayout<T>.size),
+            byteOffset: byteOffset
+        )
+    }
+
+    public func writeToHeap(data: Data, byteOffset: Int) throws {
+        let heap = try self.heap()
+
+        guard heap.isValid(byteOffset: byteOffset, length: data.count)
         else { throw WasmInterpreterError.invalidMemoryAccess }
 
         try data.withUnsafeBytes { (rawPointer: UnsafeRawBufferPointer) -> Void in
             guard let pointer = rawPointer.bindMemory(to: UInt8.self).baseAddress
             else { throw WasmInterpreterError.couldNotBindMemory }
             heap.pointer
-                .advanced(by: offset)
+                .advanced(by: byteOffset)
                 .initialize(from: pointer, count: data.count)
         }
     }
 
-    public func writeToHeap(string: String, offset: Int) throws {
-        try writeToHeap(data: Data(string.utf8), offset: offset)
+    public func writeToHeap(bytes: [UInt8], byteOffset: Int) throws {
+        let heap = try self.heap()
+
+        guard heap.isValid(byteOffset: byteOffset, length: bytes.count)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        heap.pointer
+            .advanced(by: byteOffset)
+            .initialize(from: bytes, count: bytes.count)
     }
 
-    public func writeToHeap<T: WasmTypeProtocol>(value: T, offset: Int) throws {
-        try writeToHeap(values: [value], offset: offset)
-    }
+    private func heap() throws -> Heap {
+        let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
+        defer { totalBytes.deallocate() }
 
-    public func writeToHeap<T: WasmTypeProtocol>(values: Array<T>, offset: Int) throws {
-        var values = values
-        try writeToHeap(
-            data: Data(bytes: &values, count: values.count * MemoryLayout<T>.size),
-            offset: offset
-        )
+        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0)
+        else { throw WasmInterpreterError.invalidMemoryAccess }
+
+        return Heap(pointer: bytesPointer, size: Int(totalBytes.pointee))
     }
 }
 

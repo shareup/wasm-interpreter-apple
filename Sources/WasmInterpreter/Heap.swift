@@ -1,11 +1,10 @@
 import Foundation
 
-@available(*, deprecated, message: "Heap will be removed in a later version")
-public struct Heap {
-    public let pointer: UnsafeMutablePointer<UInt8>
-    public let size: Int
+struct Heap {
+    let pointer: UnsafeMutablePointer<UInt8>
+    let size: Int
 
-    public func isValid(offset: Int, length: Int) -> Bool {
-        (offset + length) <= size
+    func isValid(byteOffset: Int, length: Int) -> Bool {
+        (byteOffset + length) <= size
     }
 }
