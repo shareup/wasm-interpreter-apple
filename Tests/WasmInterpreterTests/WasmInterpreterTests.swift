@@ -49,12 +49,16 @@ final class WasmInterpreterTests: XCTestCase {
 
         XCTAssertEqual(10753, try mod.integers(at: 0, length: 1).first)
 
+        let goodbye = "Goodbye!"
+        XCTAssertNoThrow(try mod.writeASCIICharacters(in: goodbye, to: 2))
+        XCTAssertEqual(goodbye, try mod.asciiString(at: 2, length: goodbye.count))
+
         XCTAssertEqual("👋", try mod.string(at: 17, length: "👋".utf8.count))
     }
 
     func testAccessingInvalidMemoryAddresses() throws {
         let mod = try MemoryModule()
-        let size = try mod.heapSize()
+        let size = 64 * 1024 // 1 page size = 64 KiB
 
         let message = "Hello"
 
