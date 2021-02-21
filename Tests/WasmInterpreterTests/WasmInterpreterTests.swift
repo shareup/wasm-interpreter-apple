@@ -6,6 +6,12 @@ final class WasmInterpreterTests: XCTestCase {
         let mod = try ConstantModule()
         XCTAssertEqual(65536, try mod.constant1())
         XCTAssertEqual(65536, try mod.constant2())
+        XCTAssertEqual(65536, try mod.constant3())
+        XCTAssertThrowsError(try mod.constant4()) { (error) in
+            guard case let .wasm3Error(msg) = error as? WasmInterpreterError
+            else { XCTFail(); return }
+            XCTAssertEqual("function lookup failed", msg)
+        }
     }
 
     func testPassingAndReturning32BitValues() throws {
