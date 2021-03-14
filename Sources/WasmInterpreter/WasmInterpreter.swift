@@ -201,14 +201,20 @@ extension WasmInterpreter {
         signature: String,
         handler: @escaping ImportedFunctionSignature
     ) throws {
-        guard let context = UnsafeMutableRawPointer(bitPattern: (namespace + name).hashValue) else {
-            throw WasmInterpreterError.couldNotGenerateFunctionContext
-        }
+        guard let context = UnsafeMutableRawPointer(bitPattern: (namespace + name).hashValue)
+        else { throw WasmInterpreterError.couldNotGenerateFunctionContext }
 
         do {
             setImportedFunction(handler, for: context)
             try WasmInterpreter.check(
-                m3_LinkRawFunctionEx(_module, namespace, name, signature, handleImportedFunction, context)
+                m3_LinkRawFunctionEx(
+                    _module,
+                    namespace,
+                    name,
+                    signature,
+                    handleImportedFunction,
+                    context
+                )
             )
             _lock.locked { _importedFunctionContexts.append(context) }
         } catch {
@@ -226,7 +232,8 @@ extension WasmInterpreter {
             } else {
                 var f: IM3Function?
                 try WasmInterpreter.check(m3_FindFunction(&f, _runtime, name))
-                guard let function = f else { throw WasmInterpreterError.couldNotFindFunction(name) }
+                guard let function = f
+                else { throw WasmInterpreterError.couldNotFindFunction(name) }
                 _functionCache[name] = function
                 return function
             }
@@ -288,17 +295,24 @@ private func removeImportedFunctions(for contexts: [UnsafeMutableRawPointer]) {
     importedFunctionLock.locked { contexts.forEach { contextToImportedFunction.removeValue(forKey: $0) } }
 }
 
-private func importedFunction(for context: UnsafeMutableRawPointer?) -> ImportedFunctionSignature? {
-    guard let context = context else { return nil }
+private func importedFunction(
+    for userData: UnsafeMutableRawPointer?
+) -> ImportedFunctionSignature? {
+    guard let context = userData else { return nil }
     return importedFunctionLock.locked { contextToImportedFunction[context] }
 }
 
 private func handleImportedFunction(
     _ runtime: UnsafeMutablePointer<M3Runtime>?,
+    _ context: UnsafeMutablePointer<M3ImportContext>?,
     _ stackPointer: UnsafeMutablePointer<UInt64>?,
-    _ heap: UnsafeMutableRawPointer?,
-    _ context: UnsafeMutableRawPointer?
+    _ heap: UnsafeMutableRawPointer?
 ) -> UnsafeRawPointer? {
-    guard let function = importedFunction(for: context) else { return UnsafeRawPointer(m3Err_trapUnreachable) }
+    guard let userData = context?.pointee.userdata
+    else { return UnsafeRawPointer(m3Err_trapUnreachable) }
+
+    guard let function = importedFunction(for: userData)
+    else { return UnsafeRawPointer(m3Err_trapUnreachable) }
+
     return function(stackPointer, heap)
 }
