@@ -10,9 +10,15 @@ To use `WasmInterpreter` with the Swift Package Manager, add a dependency to you
 
 ```swift
 dependencies: [
-  package(name: "WasmInterpreter", url: "https://github.com/shareup/wasm-interpreter-apple.git", .upToNextMinor(from: "0.4.0")),
+  package(name: "WasmInterpreter", url: "https://github.com/shareup/wasm-interpreter-apple.git", .upToNextMinor(from: "0.5.0")),
 ],
 ```
+
+## Troubleshooting
+
+### Can't build tests with 'ld: Could not open or create -dependency_info file' error
+
+The Address Sanitizer can't be run when linking against SynchronizedDynamic—the dynamic library version of Synchronized. So, either change WasmInterpreter to use Synchronized or disable the Address Sanitizer.
 
 ## License
 

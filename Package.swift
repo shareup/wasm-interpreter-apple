@@ -1,5 +1,4 @@
 // swift-tools-version:5.2
-
 import PackageDescription
 
 let package = Package(
@@ -13,13 +12,22 @@ let package = Package(
             targets: ["WasmInterpreter"]),
     ],
     dependencies: [
-        .package(name: "CWasm3", url: "https://github.com/shareup/cwasm3.git", .upToNextMinor(from: "0.4.7")),
-        .package(name: "Synchronized", url: "https://github.com/shareup/synchronized.git", .upToNextMajor(from: "2.1.0")),
+        .package(
+            name: "CWasm3",
+            url: "https://github.com/shareup/cwasm3.git",
+            from: "0.4.7"),
+        .package(
+            name: "Synchronized",
+            url: "https://github.com/shareup/synchronized.git",
+            from: "2.3.0"),
     ],
     targets: [
         .target(
             name: "WasmInterpreter",
-            dependencies: ["CWasm3", "Synchronized"]),
+            dependencies: [
+                "CWasm3",
+                .product(name: "SynchronizedDynamic", package: "Synchronized"),
+            ]),
         .testTarget(
             name: "WasmInterpreterTests",
             dependencies: ["WasmInterpreter"]),
