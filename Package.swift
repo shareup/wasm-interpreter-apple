@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 import PackageDescription
 
 let package = Package(
@@ -15,7 +15,7 @@ let package = Package(
         .package(
             name: "CWasm3",
             url: "https://github.com/shareup/cwasm3.git",
-            from: "0.4.7"),
+            from: "0.4.9"),
         .package(
             name: "Synchronized",
             url: "https://github.com/shareup/synchronized.git",
@@ -27,9 +27,16 @@ let package = Package(
             dependencies: [
                 "CWasm3",
                 .product(name: "SynchronizedDynamic", package: "Synchronized"),
-            ]),
+            ],
+            cSettings: [.define("APPLICATION_EXTENSION_API_ONLY", to: "YES")]),
         .testTarget(
             name: "WasmInterpreterTests",
-            dependencies: ["WasmInterpreter"]),
+            dependencies: ["WasmInterpreter"],
+            exclude: [
+                "Resources/constant.wat",
+                "Resources/memory.wat",
+                "Resources/fib64.wat",
+                "Resources/imported-add.wat",
+                "Resources/add.wat"]),
     ]
 )
