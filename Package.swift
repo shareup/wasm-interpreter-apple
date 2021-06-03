@@ -15,19 +15,16 @@ let package = Package(
         .package(
             name: "CWasm3",
             url: "https://github.com/shareup/cwasm3.git",
-            from: "0.4.9"),
+            from: "0.4.10"),
         .package(
             name: "Synchronized",
             url: "https://github.com/shareup/synchronized.git",
-            from: "2.3.0"),
+            from: "3.0.0"),
     ],
     targets: [
         .target(
             name: "WasmInterpreter",
-            dependencies: [
-                "CWasm3",
-                .product(name: "SynchronizedDynamic", package: "Synchronized"),
-            ],
+            dependencies: ["CWasm3", "Synchronized"],
             cSettings: [.define("APPLICATION_EXTENSION_API_ONLY", to: "YES")]),
         .testTarget(
             name: "WasmInterpreterTests",
