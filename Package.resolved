@@ -7,7 +7,7 @@
         "state": {
           "branch": null,
           "revision": "da60d7f032fd5be33053d51eb0d855b95ea163f1",
-          "version": "0.4.9"
+          "version": "0.4.10"
         }
       },
       {
@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/shareup/synchronized.git",
         "state": {
           "branch": null,
-          "revision": "56f5956cbd9cf4bcd2f92153c03ae293dffb0987",
-          "version": "2.3.0"
+          "revision": "f01e4a1ee5fbf586d612a8dc0bc068603f6b9450",
+          "version": "3.0.0"
         }
       }
     ]
