@@ -10,7 +10,7 @@ To use `WasmInterpreter` with the Swift Package Manager, add a dependency to you
 
 ```swift
 dependencies: [
-  .package(name: "WasmInterpreter", url: "https://github.com/shareup/wasm-interpreter-apple.git", from: "0.5.1"),
+  .package(name: "WasmInterpreter", url: "https://github.com/shareup/wasm-interpreter-apple.git", from: "0.5.3"),
 ],
 ```
 
