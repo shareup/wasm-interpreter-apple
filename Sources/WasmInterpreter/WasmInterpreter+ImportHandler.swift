@@ -1,6 +1,16 @@
 import Foundation
 import CWasm3
 
+// Arguments and return values are passed in and out through the stack pointer
+// of imported functions.
+//
+// Placeholder return value slots are first and arguments after. So, the first
+// argument is at _sp [numReturns].
+//
+// Return values should be written into _sp [0] to _sp [num_returns - 1].
+//
+// Wasm3 always aligns the stack to 64 bits.
+
 extension WasmInterpreter {
     public func addImportHandler(
         named name: String,
@@ -152,7 +162,7 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
                 let ret = try block(arg1)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -177,7 +187,7 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
                 let ret = try block(arg1, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -242,8 +252,8 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
                 let ret = try block(arg1, arg2)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -263,8 +273,8 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
                 let ret = try block(arg1, arg2, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -326,9 +336,9 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
                 let ret = try block(arg1, arg2, arg3)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -348,9 +358,9 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
                 let ret = try block(arg1, arg2, arg3, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -421,10 +431,10 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
                 let ret = try block(arg1, arg2, arg3, arg4)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -447,10 +457,10 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
                 let ret = try block(arg1, arg2, arg3, arg4, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -525,11 +535,11 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -554,11 +564,11 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -643,12 +653,12 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
-                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 6)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, arg6)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -674,12 +684,12 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
-                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 6)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, arg6, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil

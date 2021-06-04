@@ -15,7 +15,7 @@ let package = Package(
         .package(
             name: "CWasm3",
             url: "https://github.com/shareup/cwasm3.git",
-            from: "0.4.10"),
+            from: "0.5.0"),
         .package(
             name: "Synchronized",
             url: "https://github.com/shareup/synchronized.git",
