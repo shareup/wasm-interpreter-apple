@@ -704,13 +704,13 @@ extension WasmInterpreter {
         try self.importNativeFunction(named: name, namespace: namespace, signature: sig, handler: importedFunction)
     }
     
-    public func addImportHandler<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Ret>(
+    public func addImportHandler<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>(
         named name: String,
         namespace: String,
-        block: @escaping (Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) throws -> Ret
+        block: @escaping (Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) throws -> Void
     ) throws
         where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-              Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol, Ret: WasmTypeProtocol
+              Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol
     {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
@@ -722,6 +722,68 @@ extension WasmInterpreter {
                 let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
                 let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
                 let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
+                try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
+                return nil
+            } catch {
+                return importedFunctionInternalError
+            }
+        }
+        let sig = try signature(
+            arg1: Arg1.self, arg2: Arg2.self, arg3: Arg3.self,
+            arg4: Arg4.self, arg5: Arg5.self, arg6: Arg6.self, arg7: Arg7.self
+        )
+        try self.importNativeFunction(named: name, namespace: namespace, signature: sig, handler: importedFunction)
+    }
+
+    public func addImportHandler<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>(
+        named name: String,
+        namespace: String,
+        block: @escaping (Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, UnsafeMutableRawPointer?) throws -> Void
+    ) throws
+        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
+              Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol
+    {
+        let importedFunction: ImportedFunctionSignature =
+        { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
+            do {
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
+                try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7, heap)
+                return nil
+            } catch {
+                return importedFunctionInternalError
+            }
+        }
+        let sig = try signature(
+            arg1: Arg1.self, arg2: Arg2.self, arg3: Arg3.self,
+            arg4: Arg4.self, arg5: Arg5.self, arg6: Arg6.self, arg7: Arg7.self
+        )
+        try self.importNativeFunction(named: name, namespace: namespace, signature: sig, handler: importedFunction)
+    }
+    
+    public func addImportHandler<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Ret>(
+        named name: String,
+        namespace: String,
+        block: @escaping (Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7) throws -> Ret
+    ) throws
+        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
+              Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol, Ret: WasmTypeProtocol
+    {
+        let importedFunction: ImportedFunctionSignature =
+        { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
+            do {
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 6)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 7)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -747,13 +809,13 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
-                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
-                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 6)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 7)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -764,6 +826,70 @@ extension WasmInterpreter {
         let sig = try signature(
             arg1: Arg1.self, arg2: Arg2.self, arg3: Arg3.self, arg4: Arg4.self,
             arg5: Arg5.self, arg6: Arg6.self, arg7: Arg7.self, ret: Ret.self
+        )
+        try self.importNativeFunction(named: name, namespace: namespace, signature: sig, handler: importedFunction)
+    }
+    
+    public func addImportHandler<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>(
+        named name: String,
+        namespace: String,
+        block: @escaping (Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8) throws -> Void
+    ) throws
+        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
+              Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol, Arg8: WasmTypeProtocol
+    {
+        let importedFunction: ImportedFunctionSignature =
+        { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
+            do {
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
+                let arg8: Arg8 = try NativeFunction.argument(from: stack, at: 7)
+                try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
+                return nil
+            } catch {
+                return importedFunctionInternalError
+            }
+        }
+        let sig = try signature(
+            arg1: Arg1.self, arg2: Arg2.self, arg3: Arg3.self,
+            arg4: Arg4.self, arg5: Arg5.self, arg6: Arg6.self, arg7: Arg7.self, arg8: Arg8.self
+        )
+        try self.importNativeFunction(named: name, namespace: namespace, signature: sig, handler: importedFunction)
+    }
+
+    public func addImportHandler<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>(
+        named name: String,
+        namespace: String,
+        block: @escaping (Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, UnsafeMutableRawPointer?) throws -> Void
+    ) throws
+        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
+              Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol, Arg8: WasmTypeProtocol
+    {
+        let importedFunction: ImportedFunctionSignature =
+        { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
+            do {
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
+                let arg8: Arg8 = try NativeFunction.argument(from: stack, at: 7)
+                try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, heap)
+                return nil
+            } catch {
+                return importedFunctionInternalError
+            }
+        }
+        let sig = try signature(
+            arg1: Arg1.self, arg2: Arg2.self, arg3: Arg3.self,
+            arg4: Arg4.self, arg5: Arg5.self, arg6: Arg6.self, arg7: Arg7.self, arg8: Arg8.self
         )
         try self.importNativeFunction(named: name, namespace: namespace, signature: sig, handler: importedFunction)
     }
@@ -779,14 +905,14 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
-                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
-                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
-                let arg8: Arg8 = try NativeFunction.argument(from: stack, at: 7)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 6)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 7)
+                let arg8: Arg8 = try NativeFunction.argument(from: stack, at: 8)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
@@ -812,14 +938,14 @@ extension WasmInterpreter {
         let importedFunction: ImportedFunctionSignature =
         { (stack: UnsafeMutablePointer<UInt64>?, heap: UnsafeMutableRawPointer?) -> UnsafeRawPointer? in
             do {
-                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 0)
-                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 1)
-                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 2)
-                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 3)
-                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 4)
-                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 5)
-                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 6)
-                let arg8: Arg8 = try NativeFunction.argument(from: stack, at: 7)
+                let arg1: Arg1 = try NativeFunction.argument(from: stack, at: 1)
+                let arg2: Arg2 = try NativeFunction.argument(from: stack, at: 2)
+                let arg3: Arg3 = try NativeFunction.argument(from: stack, at: 3)
+                let arg4: Arg4 = try NativeFunction.argument(from: stack, at: 4)
+                let arg5: Arg5 = try NativeFunction.argument(from: stack, at: 5)
+                let arg6: Arg6 = try NativeFunction.argument(from: stack, at: 6)
+                let arg7: Arg7 = try NativeFunction.argument(from: stack, at: 7)
+                let arg8: Arg8 = try NativeFunction.argument(from: stack, at: 8)
                 let ret = try block(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, heap)
                 try NativeFunction.pushReturnValue(ret, to: stack)
                 return nil
