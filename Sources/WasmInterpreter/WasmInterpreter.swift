@@ -55,6 +55,7 @@ public final class WasmInterpreter {
         m3_FreeEnvironment(environment)
         removeImportedFunctions(forInstanceIdentifier: id)
         idPointer.deallocate()
+        Swift.print("DEINIT \(id)")
     }
 }
 
