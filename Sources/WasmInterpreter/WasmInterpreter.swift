@@ -40,7 +40,7 @@ public final class WasmInterpreter {
             throw WasmInterpreterError.couldNotLoadRuntime
         }
 
-        Swift.print("INIT", runtime.pointee.userdata, m3_GetUserData(runtime), idPointer)
+        Swift.print("INIT \(id)", m3_GetUserData(runtime)?.load(as: UInt64.self))
 
         var mod: IM3Module?
         try WasmInterpreter.check(m3_ParseModule(environment, &mod, bytes, UInt32(bytes.count)))
