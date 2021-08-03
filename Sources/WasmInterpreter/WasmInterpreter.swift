@@ -3,15 +3,18 @@ import CWasm3
 import Synchronized
 
 public final class WasmInterpreter {
-    private var _environment: IM3Environment
-    private var _runtime: IM3Runtime
-    private var _moduleAndBytes: (IM3Module, [UInt8])
-    private var _module: IM3Module { _moduleAndBytes.0 }
+    private var id: UInt64
+    private var idPointer: UnsafeMutableRawPointer
 
-    private var _functionCache = [String: IM3Function]()
-    private var _importedFunctionContexts = [UnsafeMutableRawPointer]()
+    private var environment: IM3Environment
+    private var runtime: IM3Runtime
+    private var moduleAndBytes: (IM3Module, [UInt8])
+    private var module: IM3Module { moduleAndBytes.0 }
 
-    private let _lock = Lock()
+    private var functionCache = [String: IM3Function]()
+    private var importedFunctionContexts = [UnsafeMutableRawPointer]()
+
+    private let lock = Lock()
 
     public convenience init(module: URL) throws {
         try self.init(stackSize: 512 * 1024, module: module)
@@ -26,11 +29,14 @@ public final class WasmInterpreter {
     }
 
     public init(stackSize: UInt32, module bytes: [UInt8]) throws {
+        id = nextInstanceIdentifier
+        idPointer = makeRawPointer(for: id)
+
         guard let environment = m3_NewEnvironment() else {
             throw WasmInterpreterError.couldNotLoadEnvironment
         }
 
-        guard let runtime = m3_NewRuntime(environment, stackSize, nil) else {
+        guard let runtime = m3_NewRuntime(environment, stackSize, idPointer) else {
             throw WasmInterpreterError.couldNotLoadRuntime
         }
 
@@ -39,15 +45,16 @@ public final class WasmInterpreter {
         guard let module = mod else { throw WasmInterpreterError.couldNotParseModule }
         try WasmInterpreter.check(m3_LoadModule(runtime, module))
 
-        _environment = environment
-        _runtime = runtime
-        _moduleAndBytes = (module, bytes)
+        self.environment = environment
+        self.runtime = runtime
+        moduleAndBytes = (module, bytes)
     }
 
     deinit {
-        m3_FreeRuntime(_runtime)
-        m3_FreeEnvironment(_environment)
-        removeImportedFunctions(for: _importedFunctionContexts)
+        m3_FreeRuntime(runtime)
+        m3_FreeEnvironment(environment)
+        removeImportedFunctions(forInstanceIdentifier: id)
+        idPointer.deallocate()
     }
 }
 
@@ -150,7 +157,7 @@ extension WasmInterpreter {
         let totalBytes = UnsafeMutablePointer<UInt32>.allocate(capacity: 1)
         defer { totalBytes.deallocate() }
 
-        guard let bytesPointer = m3_GetMemory(_runtime, totalBytes, 0)
+        guard let bytesPointer = m3_GetMemory(runtime, totalBytes, 0)
         else { throw WasmInterpreterError.invalidMemoryAccess }
 
         return Heap(pointer: bytesPointer, size: Int(totalBytes.pointee))
@@ -205,10 +212,10 @@ extension WasmInterpreter {
         else { throw WasmInterpreterError.couldNotGenerateFunctionContext }
 
         do {
-            setImportedFunction(handler, for: context)
+            setImportedFunction(handler, for: context, instanceIdentifier: id)
             try WasmInterpreter.check(
                 m3_LinkRawFunctionEx(
-                    _module,
+                    module,
                     namespace,
                     name,
                     signature,
@@ -216,9 +223,9 @@ extension WasmInterpreter {
                     context
                 )
             )
-            _lock.locked { _importedFunctionContexts.append(context) }
+            lock.locked { importedFunctionContexts.append(context) }
         } catch {
-            removeImportedFunction(for: context)
+            removeImportedFunction(for: context, instanceIdentifier: id)
             throw error
         }
     }
@@ -226,15 +233,15 @@ extension WasmInterpreter {
 
 extension WasmInterpreter {
     func function(named name: String) throws -> IM3Function {
-        return try _lock.locked { () throws -> IM3Function in
-            if let compiledFunction = _functionCache[name] {
+        return try lock.locked { () throws -> IM3Function in
+            if let compiledFunction = functionCache[name] {
                 return compiledFunction
             } else {
                 var f: IM3Function?
-                try WasmInterpreter.check(m3_FindFunction(&f, _runtime, name))
+                try WasmInterpreter.check(m3_FindFunction(&f, runtime, name))
                 guard let function = f
                 else { throw WasmInterpreterError.couldNotFindFunction(name) }
-                _functionCache[name] = function
+                functionCache[name] = function
                 return function
             }
         }
@@ -278,41 +285,4 @@ extension WasmInterpreter {
             throw WasmInterpreterError.wasm3Error(String(cString: result))
         }
     }
-}
-
-private let importedFunctionLock = Lock()
-private var contextToImportedFunction = Dictionary<UnsafeMutableRawPointer, ImportedFunctionSignature>()
-
-private func setImportedFunction(_ function: @escaping ImportedFunctionSignature, for context: UnsafeMutableRawPointer) {
-    importedFunctionLock.locked { contextToImportedFunction[context] = function }
-}
-
-private func removeImportedFunction(for context: UnsafeMutableRawPointer) {
-    importedFunctionLock.locked { _ = contextToImportedFunction.removeValue(forKey: context) }
-}
-
-private func removeImportedFunctions(for contexts: [UnsafeMutableRawPointer]) {
-    importedFunctionLock.locked { contexts.forEach { contextToImportedFunction.removeValue(forKey: $0) } }
-}
-
-private func importedFunction(
-    for userData: UnsafeMutableRawPointer?
-) -> ImportedFunctionSignature? {
-    guard let context = userData else { return nil }
-    return importedFunctionLock.locked { contextToImportedFunction[context] }
-}
-
-private func handleImportedFunction(
-    _ runtime: UnsafeMutablePointer<M3Runtime>?,
-    _ context: UnsafeMutablePointer<M3ImportContext>?,
-    _ stackPointer: UnsafeMutablePointer<UInt64>?,
-    _ heap: UnsafeMutableRawPointer?
-) -> UnsafeRawPointer? {
-    guard let userData = context?.pointee.userdata
-    else { return UnsafeRawPointer(m3Err_trapUnreachable) }
-
-    guard let function = importedFunction(for: userData)
-    else { return UnsafeRawPointer(m3Err_trapUnreachable) }
-
-    return function(stackPointer, heap)
 }

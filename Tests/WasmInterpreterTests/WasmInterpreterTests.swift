@@ -4,10 +4,10 @@ import XCTest
 final class WasmInterpreterTests: XCTestCase {
     func testCallingTwoFunctionsWithSameImplementation() throws {
         let mod = try ConstantModule()
-        XCTAssertEqual(65536, try mod.constant1())
-        XCTAssertEqual(65536, try mod.constant2())
-        XCTAssertEqual(65536, try mod.constant3())
-        XCTAssertThrowsError(try mod.constant4()) { (error) in
+
+        try (1...10).forEach { XCTAssertEqual(65536, try mod.constant(version: $0)) }
+
+        XCTAssertThrowsError(try mod.constant(version: 11)) { (error) in
             guard case let .wasm3Error(msg) = error as? WasmInterpreterError
             else { XCTFail(); return }
             XCTAssertEqual("function lookup failed", msg)
@@ -34,6 +34,16 @@ final class WasmInterpreterTests: XCTestCase {
     func testUsingImportedFunction() throws {
         let mod = try ImportedAddModule()
         XCTAssertEqual(-3291, try mod.askModuleToCallImportedFunction())
+    }
+
+    func testConcurrentModulesWithImportedFunctions() throws {
+        var mod1: ImportedAddModule? = try ImportedAddModule()
+        let mod2 = try ImportedAddModule()
+
+        XCTAssertEqual(-3291, try mod1?.askModuleToCallImportedFunction())
+        mod1 = nil
+
+        XCTAssertEqual(-3291, try mod2.askModuleToCallImportedFunction())
     }
 
     func testAccessingAndModifyingHeapMemory() throws {
@@ -96,6 +106,7 @@ final class WasmInterpreterTests: XCTestCase {
         ("testPassingAndReturning32BitValues", testPassingAndReturning32BitValues),
         ("testPassingAndReturning64BitValues", testPassingAndReturning64BitValues),
         ("testUsingImportedFunction", testUsingImportedFunction),
+        ("testConcurrentModulesWithImportedFunctions", testConcurrentModulesWithImportedFunctions),
         ("testAccessingAndModifyingHeapMemory", testAccessingAndModifyingHeapMemory),
         ("testAccessingInvalidMemoryAddresses", testAccessingInvalidMemoryAddresses),
     ]
