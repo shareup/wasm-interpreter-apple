@@ -51,12 +51,8 @@ func handleImportedFunction(
     _ stackPointer: UnsafeMutablePointer<UInt64>?,
     _ heap: UnsafeMutableRawPointer?
 ) -> UnsafeRawPointer? {
-    Swift.print("CALL \(#function)")
-
     guard let id = m3_GetUserData(runtime)?.load(as: UInt64.self)
     else { return UnsafeRawPointer(m3Err_trapUnreachable) }
-
-    Swift.print("\(#function) SUCCEEDED FOR \(id)")
 
     guard let userData = context?.pointee.userdata
     else { return UnsafeRawPointer(m3Err_trapUnreachable) }

@@ -40,8 +40,6 @@ public final class WasmInterpreter {
             throw WasmInterpreterError.couldNotLoadRuntime
         }
 
-        Swift.print("INIT \(id)", m3_GetUserData(runtime)?.load(as: UInt64.self))
-
         var mod: IM3Module?
         try WasmInterpreter.check(m3_ParseModule(environment, &mod, bytes, UInt32(bytes.count)))
         guard let module = mod else { throw WasmInterpreterError.couldNotParseModule }
@@ -53,7 +51,6 @@ public final class WasmInterpreter {
     }
 
     deinit {
-        Swift.print("DEINIT \(id)", runtime.pointee.userdata, m3_GetUserData(runtime), idPointer)
         m3_FreeRuntime(runtime)
         m3_FreeEnvironment(environment)
         removeImportedFunctions(forInstanceIdentifier: id)
