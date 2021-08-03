@@ -54,6 +54,7 @@ func handleImportedFunction(
     Swift.print("CALL \(#function)")
 //    Swift.print("RUNTIME:", runtime?.pointee)
 //    Swift.print("USER DATA:", runtime?.pointee.userdata)
+
     guard let id = runtime?.pointee.userdata?.load(as: UInt64.self)
     else { return UnsafeRawPointer(m3Err_trapUnreachable) }
 
