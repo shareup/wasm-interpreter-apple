@@ -57,6 +57,8 @@ func handleImportedFunction(
     guard let id = runtime?.pointee.userdata?.load(as: UInt64.self)
     else { return UnsafeRawPointer(m3Err_trapUnreachable) }
 
+    Swift.print("\(#function) SUCCEEDED FOR \(id)")
+
     guard let userData = context?.pointee.userdata
     else { return UnsafeRawPointer(m3Err_trapUnreachable) }
 
