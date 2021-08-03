@@ -36,6 +36,16 @@ final class WasmInterpreterTests: XCTestCase {
         XCTAssertEqual(-3291, try mod.askModuleToCallImportedFunction())
     }
 
+    func testConcurrentModulesWithImportedFunctions() throws {
+        var mod1: ImportedAddModule? = try ImportedAddModule()
+        let mod2 = try ImportedAddModule()
+
+        XCTAssertEqual(-3291, try mod1?.askModuleToCallImportedFunction())
+        mod1 = nil
+
+        XCTAssertEqual(-3291, try mod2.askModuleToCallImportedFunction())
+    }
+
     func testAccessingAndModifyingHeapMemory() throws {
         let mod = try MemoryModule()
 
