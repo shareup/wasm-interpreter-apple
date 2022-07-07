@@ -9,23 +9,27 @@ let package = Package(
     products: [
         .library(
             name: "WasmInterpreter",
-            targets: ["WasmInterpreter"]),
+            targets: ["WasmInterpreter"]
+        ),
     ],
     dependencies: [
         .package(
             name: "CWasm3",
             url: "https://github.com/shareup/cwasm3.git",
-            from: "0.5.1"),
+            from: "0.5.1"
+        ),
         .package(
             name: "Synchronized",
             url: "https://github.com/shareup/synchronized.git",
-            from: "3.0.0"),
+            from: "3.0.0"
+        ),
     ],
     targets: [
         .target(
             name: "WasmInterpreter",
             dependencies: ["CWasm3", "Synchronized"],
-            cSettings: [.define("APPLICATION_EXTENSION_API_ONLY", to: "YES")]),
+            cSettings: [.define("APPLICATION_EXTENSION_API_ONLY", to: "YES")]
+        ),
         .testTarget(
             name: "WasmInterpreterTests",
             dependencies: ["WasmInterpreter"],
@@ -34,6 +38,8 @@ let package = Package(
                 "Resources/memory.wat",
                 "Resources/fib64.wat",
                 "Resources/imported-add.wat",
-                "Resources/add.wat"]),
+                "Resources/add.wat",
+            ]
+        ),
     ]
 )

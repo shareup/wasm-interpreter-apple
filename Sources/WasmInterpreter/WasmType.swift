@@ -7,9 +7,9 @@ extension Int64: WasmTypeProtocol {}
 extension Float32: WasmTypeProtocol {}
 extension Float64: WasmTypeProtocol {}
 
-func isValidWasmType<T: WasmTypeProtocol>(_ type: T.Type) -> Bool {
-    return Int32.self == T.self || Int64.self == T.self ||
-           Float32.self == T.self || Float64.self == T.self
+func isValidWasmType<T: WasmTypeProtocol>(_: T.Type) -> Bool {
+    Int32.self == T.self || Int64.self == T.self ||
+        Float32.self == T.self || Float64.self == T.self
 }
 
 enum WasmType: Hashable {

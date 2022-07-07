@@ -1,12 +1,13 @@
-import Foundation
 import CWasm3
+import Foundation
 
 struct NativeFunction {
     static func argument<Arg: WasmTypeProtocol>(
         from stack: UnsafeMutablePointer<UInt64>?,
         at index: Int
     ) throws -> Arg {
-        guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
+        guard let stack = UnsafeMutableRawPointer(stack)
+        else { throw WasmInterpreterError.invalidStackPointer }
         guard isValidWasmType(Arg.self) else {
             throw WasmInterpreterError.unsupportedWasmType(String(describing: Arg.self))
         }
@@ -30,7 +31,8 @@ struct NativeFunction {
         withTypes types: [WasmType],
         from stack: UnsafeMutablePointer<UInt64>?
     ) throws -> [WasmValue] {
-        guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
+        guard let stack = UnsafeMutableRawPointer(stack)
+        else { throw WasmInterpreterError.invalidStackPointer }
 
         var values = [WasmValue]()
         for (index, type) in types.enumerated() {
@@ -77,7 +79,8 @@ struct NativeFunction {
         _ ret: Ret,
         to stack: UnsafeMutablePointer<UInt64>?
     ) throws {
-        guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
+        guard let stack = UnsafeMutableRawPointer(stack)
+        else { throw WasmInterpreterError.invalidStackPointer }
         guard isValidWasmType(Ret.self) else {
             throw WasmInterpreterError.unsupportedWasmType(String(describing: Ret.self))
         }
@@ -92,17 +95,21 @@ struct NativeFunction {
     /// - Parameters:
     ///   - ret: The value to return from the imported function.
     ///   - stack: The stack pointer.
-    static func pushReturnValue(_ ret: WasmValue, to stack: UnsafeMutablePointer<UInt64>?) throws {
-        guard let stack = UnsafeMutableRawPointer(stack) else { throw WasmInterpreterError.invalidStackPointer }
+    static func pushReturnValue(
+        _ ret: WasmValue,
+        to stack: UnsafeMutablePointer<UInt64>?
+    ) throws {
+        guard let stack = UnsafeMutableRawPointer(stack)
+        else { throw WasmInterpreterError.invalidStackPointer }
 
         switch ret {
-        case .int32(let value):
+        case let .int32(value):
             stack.storeBytes(of: value, as: Int32.self)
-        case .int64(let value):
+        case let .int64(value):
             stack.storeBytes(of: value, as: Int64.self)
-        case .float32(let value):
+        case let .float32(value):
             stack.storeBytes(of: value, as: Float32.self)
-        case .float64(let value):
+        case let .float64(value):
             stack.storeBytes(of: value, as: Float64.self)
         }
     }

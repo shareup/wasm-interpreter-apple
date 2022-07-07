@@ -9,12 +9,12 @@ public struct AddModule {
     }
 
     func add(_ first: Int, _ second: Int) throws -> Int {
-        return Int(try _vm.call("add", Int32(first), Int32(second)) as Int32)
+        Int(try _vm.call("add", Int32(first), Int32(second)) as Int32)
     }
 
     // `wat2wasm -o >(base64) Tests/WasmInterpreterTests/Resources/add.wat | pbcopy`
     private static var wasm: [UInt8] {
         let base64 = "AGFzbQEAAAABBwFgAn9/AX8DAgEABwcBA2FkZAAACgkBBwAgACABags="
-        return Array<UInt8>(Data(base64Encoded: base64)!)
+        return [UInt8](Data(base64Encoded: base64)!)
     }
 }

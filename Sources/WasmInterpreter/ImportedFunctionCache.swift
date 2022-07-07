@@ -1,6 +1,6 @@
+import CWasm3
 import Foundation
 import Synchronized
-import CWasm3
 
 // MARK: - Managing imported functions
 
@@ -85,4 +85,5 @@ func makeRawPointer(for id: UInt64) -> UnsafeMutableRawPointer {
 
 private let lock = Lock()
 private var lastInstanceIdentifier: UInt64 = 0
-private var importedFunctionCache = [UInt64: [UnsafeMutableRawPointer: ImportedFunctionSignature]]()
+private var importedFunctionCache =
+    [UInt64: [UnsafeMutableRawPointer: ImportedFunctionSignature]]()
