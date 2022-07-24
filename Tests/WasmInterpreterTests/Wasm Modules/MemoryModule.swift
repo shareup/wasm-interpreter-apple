@@ -18,9 +18,11 @@ public struct MemoryModule {
     }
 
     func asciiString(at byteOffset: Int, length: Int) throws -> String {
-        String((try _vm.bytesFromHeap(byteOffset: byteOffset, length: length)
-                    .map(UnicodeScalar.init)
-                    .map(Character.init)))
+        String(
+            try _vm.bytesFromHeap(byteOffset: byteOffset, length: length)
+                .map(UnicodeScalar.init)
+                .map(Character.init)
+        )
     }
 
     func write(_ string: String, to byteOffset: Int) throws {
@@ -32,7 +34,7 @@ public struct MemoryModule {
     }
 
     func writeASCIICharacters(in string: String, to byteOffset: Int) throws {
-        let bytes = string.compactMap { $0.asciiValue }
+        let bytes = string.compactMap(\.asciiValue)
 
         enum _Error: Error {
             case invalidString(String)
@@ -47,6 +49,6 @@ public struct MemoryModule {
     // `wat2wasm -o >(base64) Tests/WasmInterpreterTests/Resources/memory.wat | pbcopy`
     private static var wasm: [UInt8] {
         let base64 = "AGFzbQEAAAAFAwEAAQ=="
-        return Array<UInt8>(Data(base64Encoded: base64)!)
+        return [UInt8](Data(base64Encoded: base64)!)
     }
 }

@@ -1,13 +1,13 @@
-import XCTest
 @testable import WasmInterpreter
+import XCTest
 
 final class WasmInterpreterTests: XCTestCase {
     func testCallingTwoFunctionsWithSameImplementation() throws {
         let mod = try ConstantModule()
 
-        try (1...10).forEach { XCTAssertEqual(65536, try mod.constant(version: $0)) }
+        try (1 ... 10).forEach { XCTAssertEqual(65536, try mod.constant(version: $0)) }
 
-        XCTAssertThrowsError(try mod.constant(version: 11)) { (error) in
+        XCTAssertThrowsError(try mod.constant(version: 11)) { error in
             guard case let .wasm3Error(msg) = error as? WasmInterpreterError
             else { XCTFail(); return }
             XCTAssertEqual("function lookup failed", msg)
@@ -19,7 +19,7 @@ final class WasmInterpreterTests: XCTestCase {
         XCTAssertEqual(0, try mod.add(-1, 1))
         XCTAssertEqual(0, try mod.add(0, 0))
         XCTAssertEqual(3, try mod.add(1, 2))
-        XCTAssertEqual(910861, try mod.add(13425, 897436))
+        XCTAssertEqual(910_861, try mod.add(13425, 897_436))
     }
 
     func testPassingAndReturning64BitValues() throws {
@@ -102,11 +102,17 @@ final class WasmInterpreterTests: XCTestCase {
     }
 
     static var allTests = [
-        ("testCallingTwoFunctionsWithSameImplementation", testCallingTwoFunctionsWithSameImplementation),
+        (
+            "testCallingTwoFunctionsWithSameImplementation",
+            testCallingTwoFunctionsWithSameImplementation
+        ),
         ("testPassingAndReturning32BitValues", testPassingAndReturning32BitValues),
         ("testPassingAndReturning64BitValues", testPassingAndReturning64BitValues),
         ("testUsingImportedFunction", testUsingImportedFunction),
-        ("testConcurrentModulesWithImportedFunctions", testConcurrentModulesWithImportedFunctions),
+        (
+            "testConcurrentModulesWithImportedFunctions",
+            testConcurrentModulesWithImportedFunctions
+        ),
         ("testAccessingAndModifyingHeapMemory", testAccessingAndModifyingHeapMemory),
         ("testAccessingInvalidMemoryAddresses", testAccessingInvalidMemoryAddresses),
     ]
