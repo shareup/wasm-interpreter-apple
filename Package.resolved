@@ -2,21 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "CWasm3",
-        "repositoryURL": "https://github.com/shareup/cwasm3.git",
-        "state": {
-          "branch": null,
-          "revision": "38335527c3ae87017d2c8993816d0e9612d18fc7",
-          "version": "0.5.1"
-        }
-      },
-      {
         "package": "Synchronized",
         "repositoryURL": "https://github.com/shareup/synchronized.git",
         "state": {
           "branch": null,
-          "revision": "f01e4a1ee5fbf586d612a8dc0bc068603f6b9450",
-          "version": "3.0.0"
+          "revision": "ab58ad52ede004d65ee11b07aebb76392d9c0cec",
+          "version": "3.1.0"
         }
       }
     ]

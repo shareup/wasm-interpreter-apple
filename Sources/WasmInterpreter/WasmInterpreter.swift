@@ -249,7 +249,7 @@ extension WasmInterpreter {
     }
 
     func _call(_ function: IM3Function, args: [String]) throws {
-        try args.withCStrings { cStrings throws in
+        try args.withCStrings { cStrings throws -> Void in
             var mutableCStrings = cStrings
             let size = UnsafeMutablePointer<Int>.allocate(capacity: 1)
             let r = wasm3_CallWithArgs(
