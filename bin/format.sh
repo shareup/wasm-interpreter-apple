@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
+# https://sharats.me/posts/shell-script-best-practices/
 
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
 
-SELF=`realpath $0`
-DIR=`dirname $SELF`
-DEV_DIR=`echo ${DIR%/*}`
+if [[ "${1-}" =~ ^-*h(elp)?$ ]]; then
+    echo 'Usage: ./format.sh'
+    exit
+fi
 
-pushd "$DEV_DIR" &>/dev/null
+DIR=`dirname "$0"`
+pushd "$DIR/.." &>/dev/null
 
 if command -v swiftformat >/dev/null 2>&1; then
   swiftformat --quiet --config .swiftformat .
 else
-  echo "warning: Install swiftformat by running 'brew install swiftformat'"
+  echo "warning: Install swiftformat by running 'brew install swiftformat'" >&2
 fi
 
 popd &>/dev/null

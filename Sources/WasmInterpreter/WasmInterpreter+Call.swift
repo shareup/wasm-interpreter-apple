@@ -9,41 +9,40 @@ public extension WasmInterpreter {
         try _call(try function(named: name), args: [])
     }
 
-    func call<Arg1>(_ name: String, _ arg1: Arg1) throws where Arg1: WasmTypeProtocol {
+    func call(_ name: String, _ arg1: some WasmTypeProtocol) throws {
         try _call(try function(named: name), args: [try String(wasmType: arg1)])
     }
 
-    func call<Arg1, Ret>(
-        _ name: String, _ arg1: Arg1
-    ) throws -> Ret where Arg1: WasmTypeProtocol, Ret: WasmTypeProtocol {
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol
+    ) throws -> Ret where Ret: WasmTypeProtocol {
         try _call(try function(named: name), args: [try String(wasmType: arg1)])
     }
 
-    func call<Arg1, Arg2>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2
-    ) throws where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol {
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol
+    ) throws {
         try _call(
             try function(named: name),
             args: [try String(wasmType: arg1), try String(wasmType: arg2)]
         )
     }
 
-    func call<Arg1, Arg2, Ret>(
+    func call<Ret>(
         _ name: String,
-        _ arg1: Arg1,
-        _ arg2: Arg2
-    ) throws -> Ret where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol,
-        Ret: WasmTypeProtocol
-    {
+        _ arg1: some WasmTypeProtocol,
+        _ arg2: some WasmTypeProtocol
+    ) throws -> Ret where Ret: WasmTypeProtocol {
         try _call(
             try function(named: name),
             args: [try String(wasmType: arg1), try String(wasmType: arg2)]
         )
     }
 
-    func call<Arg1, Arg2, Arg3>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3
-    ) throws where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol {
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol
+    ) throws {
         try _call(
             try function(named: name),
             args: [
@@ -54,11 +53,11 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Ret>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol
     ) throws -> Ret
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Ret: WasmTypeProtocol
+        where Ret: WasmTypeProtocol
     {
         try _call(
             try function(named: name),
@@ -70,11 +69,26 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3, _ arg4: Arg4
-    ) throws
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol, _ arg4: some WasmTypeProtocol
+    ) throws {
+        try _call(
+            try function(named: name),
+            args: [
+                try String(wasmType: arg1),
+                try String(wasmType: arg2),
+                try String(wasmType: arg3),
+                try String(wasmType: arg4),
+            ]
+        )
+    }
+
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol, _ arg4: some WasmTypeProtocol
+    ) throws -> Ret
+        where Ret: WasmTypeProtocol
     {
         try _call(
             try function(named: name),
@@ -87,12 +101,11 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Ret>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3, _ arg4: Arg4
-    ) throws -> Ret
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Ret: WasmTypeProtocol
-    {
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol, _ arg4: some WasmTypeProtocol,
+        _ arg5: some WasmTypeProtocol
+    ) throws {
         try _call(
             try function(named: name),
             args: [
@@ -100,15 +113,17 @@ public extension WasmInterpreter {
                 try String(wasmType: arg2),
                 try String(wasmType: arg3),
                 try String(wasmType: arg4),
+                try String(wasmType: arg5),
             ]
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3, _ arg4: Arg4, _ arg5: Arg5
-    ) throws
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol, _ arg4: some WasmTypeProtocol,
+        _ arg5: some WasmTypeProtocol
+    ) throws -> Ret
+        where Ret: WasmTypeProtocol
     {
         try _call(
             try function(named: name),
@@ -122,12 +137,12 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Ret>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3, _ arg4: Arg4, _ arg5: Arg5
-    ) throws -> Ret
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Ret: WasmTypeProtocol
-    {
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol,
+        _ arg4: some WasmTypeProtocol, _ arg5: some WasmTypeProtocol,
+        _ arg6: some WasmTypeProtocol
+    ) throws {
         try _call(
             try function(named: name),
             args: [
@@ -136,16 +151,18 @@ public extension WasmInterpreter {
                 try String(wasmType: arg3),
                 try String(wasmType: arg4),
                 try String(wasmType: arg5),
+                try String(wasmType: arg6),
             ]
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3,
-        _ arg4: Arg4, _ arg5: Arg5, _ arg6: Arg6
-    ) throws
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol,
+        _ arg4: some WasmTypeProtocol, _ arg5: some WasmTypeProtocol,
+        _ arg6: some WasmTypeProtocol
+    ) throws -> Ret
+        where Ret: WasmTypeProtocol
     {
         try _call(
             try function(named: name),
@@ -160,14 +177,12 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Ret>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3,
-        _ arg4: Arg4, _ arg5: Arg5, _ arg6: Arg6
-    ) throws -> Ret
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol,
-        Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Ret: WasmTypeProtocol
-    {
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol,
+        _ arg4: some WasmTypeProtocol, _ arg5: some WasmTypeProtocol,
+        _ arg6: some WasmTypeProtocol, _ arg7: some WasmTypeProtocol
+    ) throws {
         try _call(
             try function(named: name),
             args: [
@@ -177,17 +192,18 @@ public extension WasmInterpreter {
                 try String(wasmType: arg4),
                 try String(wasmType: arg5),
                 try String(wasmType: arg6),
+                try String(wasmType: arg7),
             ]
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3,
-        _ arg4: Arg4, _ arg5: Arg5, _ arg6: Arg6, _ arg7: Arg7
-    ) throws
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol,
-        Arg7: WasmTypeProtocol
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol,
+        _ arg4: some WasmTypeProtocol, _ arg5: some WasmTypeProtocol,
+        _ arg6: some WasmTypeProtocol, _ arg7: some WasmTypeProtocol
+    ) throws -> Ret
+        where Ret: WasmTypeProtocol
     {
         try _call(
             try function(named: name),
@@ -203,36 +219,13 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Ret>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3,
-        _ arg4: Arg4, _ arg5: Arg5, _ arg6: Arg6, _ arg7: Arg7
-    ) throws -> Ret
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol,
-        Arg7: WasmTypeProtocol, Ret: WasmTypeProtocol
-    {
-        try _call(
-            try function(named: name),
-            args: [
-                try String(wasmType: arg1),
-                try String(wasmType: arg2),
-                try String(wasmType: arg3),
-                try String(wasmType: arg4),
-                try String(wasmType: arg5),
-                try String(wasmType: arg6),
-                try String(wasmType: arg7),
-            ]
-        )
-    }
-
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3,
-        _ arg4: Arg4, _ arg5: Arg5, _ arg6: Arg6, _ arg7: Arg7, _ arg8: Arg8
-    ) throws
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol,
-        Arg7: WasmTypeProtocol, Arg8: WasmTypeProtocol
-    {
+    func call(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol,
+        _ arg4: some WasmTypeProtocol, _ arg5: some WasmTypeProtocol,
+        _ arg6: some WasmTypeProtocol, _ arg7: some WasmTypeProtocol,
+        _ arg8: some WasmTypeProtocol
+    ) throws {
         try _call(
             try function(named: name),
             args: [
@@ -248,13 +241,14 @@ public extension WasmInterpreter {
         )
     }
 
-    func call<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Ret>(
-        _ name: String, _ arg1: Arg1, _ arg2: Arg2, _ arg3: Arg3,
-        _ arg4: Arg4, _ arg5: Arg5, _ arg6: Arg6, _ arg7: Arg7, _ arg8: Arg8
+    func call<Ret>(
+        _ name: String, _ arg1: some WasmTypeProtocol, _ arg2: some WasmTypeProtocol,
+        _ arg3: some WasmTypeProtocol,
+        _ arg4: some WasmTypeProtocol, _ arg5: some WasmTypeProtocol,
+        _ arg6: some WasmTypeProtocol, _ arg7: some WasmTypeProtocol,
+        _ arg8: some WasmTypeProtocol
     ) throws -> Ret
-        where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-        Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol,
-        Arg7: WasmTypeProtocol, Arg8: WasmTypeProtocol, Ret: WasmTypeProtocol
+        where Ret: WasmTypeProtocol
     {
         try _call(
             try function(named: name),

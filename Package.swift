@@ -1,11 +1,10 @@
-// swift-tools-version:5.5
-
+// swift-tools-version:5.7
 import PackageDescription
 
 let package = Package(
     name: "WasmInterpreter",
     platforms: [
-        .macOS(.v10_15), .iOS(.v14),
+        .macOS(.v11), .iOS(.v14),
     ],
     products: [
         .library(
@@ -15,15 +14,17 @@ let package = Package(
     ],
     dependencies: [
         .package(
-            name: "Synchronized",
             url: "https://github.com/shareup/synchronized.git",
-            from: "3.1.0"
+            from: "4.0.0"
         ),
     ],
     targets: [
         .target(
             name: "WasmInterpreter",
-            dependencies: [ "CWasm3", "Synchronized" ],
+            dependencies: [
+                "CWasm3",
+                .product(name: "Synchronized", package: "synchronized"),
+            ],
             cSettings: [
                 .define("APPLICATION_EXTENSION_API_ONLY", to: "YES"),
             ]

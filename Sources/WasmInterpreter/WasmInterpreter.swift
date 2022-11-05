@@ -76,7 +76,7 @@ public extension WasmInterpreter {
     }
 
     func valuesFromHeap<T: WasmTypeProtocol>(byteOffset: Int, length: Int) throws -> [T] {
-        let heap = try self.heap()
+        let heap = try heap()
 
         guard heap.isValid(byteOffset: byteOffset, length: length)
         else { throw WasmInterpreterError.invalidMemoryAccess }
@@ -89,7 +89,7 @@ public extension WasmInterpreter {
     }
 
     func dataFromHeap(byteOffset: Int, length: Int) throws -> Data {
-        let heap = try self.heap()
+        let heap = try heap()
 
         guard heap.isValid(byteOffset: byteOffset, length: length)
         else { throw WasmInterpreterError.invalidMemoryAccess }
@@ -98,7 +98,7 @@ public extension WasmInterpreter {
     }
 
     func bytesFromHeap(byteOffset: Int, length: Int) throws -> [UInt8] {
-        let heap = try self.heap()
+        let heap = try heap()
 
         guard heap.isValid(byteOffset: byteOffset, length: length)
         else { throw WasmInterpreterError.invalidMemoryAccess }
@@ -115,7 +115,7 @@ public extension WasmInterpreter {
         try writeToHeap(data: Data(string.utf8), byteOffset: byteOffset)
     }
 
-    func writeToHeap<T: WasmTypeProtocol>(value: T, byteOffset: Int) throws {
+    func writeToHeap(value: some WasmTypeProtocol, byteOffset: Int) throws {
         try writeToHeap(values: [value], byteOffset: byteOffset)
     }
 
@@ -128,7 +128,7 @@ public extension WasmInterpreter {
     }
 
     func writeToHeap(data: Data, byteOffset: Int) throws {
-        let heap = try self.heap()
+        let heap = try heap()
 
         guard heap.isValid(byteOffset: byteOffset, length: data.count)
         else { throw WasmInterpreterError.invalidMemoryAccess }
@@ -143,7 +143,7 @@ public extension WasmInterpreter {
     }
 
     func writeToHeap(bytes: [UInt8], byteOffset: Int) throws {
-        let heap = try self.heap()
+        let heap = try heap()
 
         guard heap.isValid(byteOffset: byteOffset, length: bytes.count)
         else { throw WasmInterpreterError.invalidMemoryAccess }
@@ -200,7 +200,8 @@ extension WasmInterpreter {
     ///   WebAssembly module.
     ///   - namespace: The namespace of the function to import, matching the namespace
     ///   specified inside the WebAssembly module.
-    ///   - signature: The signature of the function to import, conforming to `wasm3`'s guidelines
+    ///   - signature: The signature of the function to import, conforming to `wasm3`'s
+    /// guidelines
     ///   as outlined above.
     ///   - handler: The function to import into the specified WebAssembly module.
     func importNativeFunction(
@@ -249,7 +250,7 @@ extension WasmInterpreter {
     }
 
     func _call(_ function: IM3Function, args: [String]) throws {
-        try args.withCStrings { cStrings throws -> Void in
+        try args.withCStrings { cStrings throws in
             var mutableCStrings = cStrings
             let size = UnsafeMutablePointer<Int>.allocate(capacity: 1)
             let r = wasm3_CallWithArgs(

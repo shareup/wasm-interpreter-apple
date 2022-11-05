@@ -1,18 +1,14 @@
-name: ci
+name: CI
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - '*'
-      
+on: push
+
 jobs:
-  build:
-    name: macOS
-    runs-on: macos-latest
+  test:
+    runs-on: macos-12
+    
     steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
+      - uses: actions/checkout@v3
+      - name: Select Xcode 14
+        run: sudo xcode-select -s /Applications/Xcode_14.1.app
+      - name: Test
         run: swift test
