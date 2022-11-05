@@ -2,9 +2,9 @@ import Foundation
 
 func signature() throws -> String { "v()" }
 
-func signature<Arg1>(
-    arg1: Arg1.Type
-) throws -> String where Arg1: WasmTypeProtocol {
+func signature(
+    arg1: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self)
@@ -12,9 +12,9 @@ func signature<Arg1>(
     return signature
 }
 
-func signature<Ret>(
-    ret: Ret.Type
-) throws -> String where Ret: WasmTypeProtocol {
+func signature(
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -22,10 +22,10 @@ func signature<Ret>(
     return signature
 }
 
-func signature<Arg1, Ret>(
-    arg1: Arg1.Type,
-    ret: Ret.Type
-) throws -> String where Arg1: WasmTypeProtocol, Ret: WasmTypeProtocol {
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -34,10 +34,10 @@ func signature<Arg1, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type
-) throws -> String where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol {
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -46,11 +46,11 @@ func signature<Arg1, Arg2>(
     return signature
 }
 
-func signature<Arg1, Arg2, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    ret: Ret.Type
-) throws -> String where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Ret: WasmTypeProtocol {
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -60,13 +60,11 @@ func signature<Arg1, Arg2, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -76,15 +74,12 @@ func signature<Arg1, Arg2, Arg3>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    ret: Ret.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Ret: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -95,15 +90,12 @@ func signature<Arg1, Arg2, Arg3, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -114,16 +106,13 @@ func signature<Arg1, Arg2, Arg3, Arg4>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    ret: Ret.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol,
-    Arg3: WasmTypeProtocol, Arg4: WasmTypeProtocol, Ret: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -135,16 +124,13 @@ func signature<Arg1, Arg2, Arg3, Arg4, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -156,17 +142,14 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    ret: Ret.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Ret: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -179,17 +162,14 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    arg6: Arg6.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol, Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    arg6: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -202,19 +182,15 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    arg6: Arg6.Type,
-    ret: Ret.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol,
-    Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Ret: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    arg6: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -228,19 +204,15 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    arg6: Arg6.Type,
-    arg7: Arg7.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol,
-    Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    arg6: (some WasmTypeProtocol).Type,
+    arg7: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -254,21 +226,16 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    arg6: Arg6.Type,
-    arg7: Arg7.Type,
-    ret: Ret.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol,
-    Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol,
-    Ret: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    arg6: (some WasmTypeProtocol).Type,
+    arg7: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("
@@ -283,21 +250,16 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Ret>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    arg6: Arg6.Type,
-    arg7: Arg7.Type,
-    arg8: Arg8.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol,
-    Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol,
-    Arg8: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    arg6: (some WasmTypeProtocol).Type,
+    arg7: (some WasmTypeProtocol).Type,
+    arg8: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = "v"
     signature += "("
     signature += try signatureIdentifier(for: arg1.self) + " "
@@ -312,22 +274,17 @@ func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8>(
     return signature
 }
 
-func signature<Arg1, Arg2, Arg3, Arg4, Arg5, Arg6, Arg7, Arg8, Ret>(
-    arg1: Arg1.Type,
-    arg2: Arg2.Type,
-    arg3: Arg3.Type,
-    arg4: Arg4.Type,
-    arg5: Arg5.Type,
-    arg6: Arg6.Type,
-    arg7: Arg7.Type,
-    arg8: Arg8.Type,
-    ret: Ret.Type
-) throws -> String
-    where Arg1: WasmTypeProtocol, Arg2: WasmTypeProtocol, Arg3: WasmTypeProtocol,
-    Arg4: WasmTypeProtocol,
-    Arg5: WasmTypeProtocol, Arg6: WasmTypeProtocol, Arg7: WasmTypeProtocol,
-    Arg8: WasmTypeProtocol, Ret: WasmTypeProtocol
-{
+func signature(
+    arg1: (some WasmTypeProtocol).Type,
+    arg2: (some WasmTypeProtocol).Type,
+    arg3: (some WasmTypeProtocol).Type,
+    arg4: (some WasmTypeProtocol).Type,
+    arg5: (some WasmTypeProtocol).Type,
+    arg6: (some WasmTypeProtocol).Type,
+    arg7: (some WasmTypeProtocol).Type,
+    arg8: (some WasmTypeProtocol).Type,
+    ret: (some WasmTypeProtocol).Type
+) throws -> String {
     var signature = ""
     signature += try signatureIdentifier(for: ret.self)
     signature += "("

@@ -1,6 +1,6 @@
 import Foundation
 
-extension Array where Element == String {
+extension [String] {
     func withCStrings<Result>(
         _ body: ([UnsafePointer<CChar>?]) throws -> Result
     ) rethrows -> Result {
@@ -24,7 +24,7 @@ extension Array where Element == String {
     }
 }
 
-private extension Array where Element == Int {
+private extension [Int] {
     func offsetsAndTotalLength() -> ([Int], Int) {
         var output = [0]
         var total = 0

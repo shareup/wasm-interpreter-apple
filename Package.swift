@@ -23,7 +23,7 @@ let package = Package(
             name: "WasmInterpreter",
             dependencies: [
                 "CWasm3",
-                .product(name: "Synchronized", package: "synchronized")
+                .product(name: "Synchronized", package: "synchronized"),
             ],
             cSettings: [
                 .define("APPLICATION_EXTENSION_API_ONLY", to: "YES"),
