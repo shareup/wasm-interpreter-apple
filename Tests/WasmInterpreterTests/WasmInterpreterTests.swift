@@ -5,7 +5,7 @@ final class WasmInterpreterTests: XCTestCase {
     func testCallingTwoFunctionsWithSameImplementation() throws {
         let mod = try ConstantModule()
 
-        try (1 ... 10).forEach { XCTAssertEqual(65536, try mod.constant(version: $0)) }
+        try (1 ... 10).forEach { XCTAssertEqual(65_536, try mod.constant(version: $0)) }
 
         XCTAssertThrowsError(try mod.constant(version: 11)) { error in
             guard case let .wasm3Error(msg) = error as? WasmInterpreterError
@@ -19,7 +19,7 @@ final class WasmInterpreterTests: XCTestCase {
         XCTAssertEqual(0, try mod.add(-1, 1))
         XCTAssertEqual(0, try mod.add(0, 0))
         XCTAssertEqual(3, try mod.add(1, 2))
-        XCTAssertEqual(910_861, try mod.add(13425, 897_436))
+        XCTAssertEqual(910_861, try mod.add(13_425, 897_436))
     }
 
     func testPassingAndReturning64BitValues() throws {
@@ -28,7 +28,7 @@ final class WasmInterpreterTests: XCTestCase {
         XCTAssertEqual(1, try mod.calculateValue(at: 1))
         XCTAssertEqual(1, try mod.calculateValue(at: 2))
         XCTAssertEqual(5, try mod.calculateValue(at: 5))
-        XCTAssertEqual(75025, try mod.calculateValue(at: 25))
+        XCTAssertEqual(75_025, try mod.calculateValue(at: 25))
     }
 
     func testUsingImportedFunction() throws {
@@ -63,7 +63,7 @@ final class WasmInterpreterTests: XCTestCase {
         try mod.write(fortyTwo, to: 1)
         XCTAssertEqual(42, try mod.integers(at: 1, length: 1).first)
 
-        XCTAssertEqual(10753, try mod.integers(at: 0, length: 1).first)
+        XCTAssertEqual(10_753, try mod.integers(at: 0, length: 1).first)
 
         let goodbye = "Goodbye!"
         XCTAssertNoThrow(try mod.writeASCIICharacters(in: goodbye, to: 2))
