@@ -1,3 +1,7 @@
+--disable     \
+  hoistAwait, \
+  hoistTry
+
 --funcattributes prev-line
 --minversion 0.47.2
 --maxwidth 96
